@@ -65,7 +65,7 @@
 
 1. PyCharm/VS Code
 2. Git/Github
-3. FastAPI
+3. Django
 4. Dear PyGui
 5. Симметричное и ассиметричное шифрование и цифровая подпись
 6. PostgreSQL

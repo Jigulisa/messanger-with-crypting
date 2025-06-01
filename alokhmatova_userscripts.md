@@ -1,4 +1,4 @@
-![u42Df1SlSLEOdY1Deo3GgkblfwaLG74V jpeg](https://github.com/user-attachments/assets/1932ae74-c7cf-41db-b916-7c7c3527bfc1)# Лохматова Алиса - "Cryptogramm"
+# Лохматова Алиса - "Cryptogramm"
 # Пользовательские сценарии
 
 ### Группа: 10 - И - 3

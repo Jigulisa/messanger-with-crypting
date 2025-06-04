@@ -1,15 +1,12 @@
 import dearpygui.dearpygui as dpg
-import tkinter as tk
 
-root = tk.Tk()
-WIDTH = root.winfo_screenwidth()
-HEIGHT = root.winfo_screenheight()
-root.destroy()
+WIDTH = 1280  # here was tkinter
+HEIGHT = 720
 
 dpg.create_context()
 dpg.create_viewport(title='Messanger', width=WIDTH // 2, height=HEIGHT // 2)
 
-with dpg.window(label="Messanger", width=WIDTH//4, height=HEIGHT//2):
+with dpg.window(label="Messanger", width=dpg.get_viewport_width()//2, height=dpg.get_viewport_height()):
     dpg.add_text("School chat")
     dpg.add_button(label="Send",)
     dpg.add_input_text(label="ur message", default_value="bobr curwa")
@@ -19,3 +16,4 @@ dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.start_dearpygui()
 dpg.destroy_context()
+

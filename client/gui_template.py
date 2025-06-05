@@ -39,8 +39,8 @@ class MessengerApp:
     def __init__(self, width, height):
         self.width = width
         self.height = height
-        self.window_tags = ["chats_list"]
-        self.sizes = [(3, 1)]
+        self.window_tags = ["chats_list", "chat_messages"]
+        self.sizes = [(4, 1, "0", "0"), (1.36, 1.2, "self.width // 4 - 1", "self.height // 15")]
         self.previous_size = (width, height)
         dpg.create_context()
         dpg.create_viewport(title='Solorous', width=self.width, height=self.height)
@@ -51,7 +51,8 @@ class MessengerApp:
     def create_windows(self):
         for i in range(len(self.window_tags)):
             with dpg.window(width=self.width // self.sizes[i][0], height=self.height // self.sizes[i][1],
-                            tag=self.window_tags[i], no_title_bar=True):
+                            tag=self.window_tags[i], no_title_bar=True, no_move=True):
+                dpg.set_item_pos(self.window_tags[i], [eval(self.sizes[i][2]), eval(self.sizes[i][3])])
                 if self.window_tags[i] == "chats_list":
                     for j in ["andy", "class chat", "mom", "barotrauma"]:  # here data should be taken from db
                         dpg.add_text(j)
@@ -62,19 +63,20 @@ class MessengerApp:
                     dpg.add_input_text(label="ur message", default_value="bobr curwa")
                     dpg.add_button(label="Send")
 
-    def resize_handler(self):
+    def refactor_windows(self):
         self.width = dpg.get_viewport_width()
         self.height = dpg.get_viewport_height()
         if self.previous_size != (self.width, self.height):
             for i in range(len(self.window_tags)):
-                dpg.configure_item(self.window_tags[i], width=self.width // self.sizes[i][0], height=self.height // self.sizes[i][1])
+                dpg.configure_item(self.window_tags[i], width=self.width // self.sizes[i][0],
+                                   height=self.height // self.sizes[i][1])
+                dpg.set_item_pos(self.window_tags[i], [eval(self.sizes[i][2]), eval(self.sizes[i][3])])
 
             self.previous_size = (self.width, self.height)
 
-
     def run(self):
         while dpg.is_dearpygui_running():
-            self.resize_handler()
+            self.refactor_windows()
             dpg.render_dearpygui_frame()
         dpg.destroy_context()
 

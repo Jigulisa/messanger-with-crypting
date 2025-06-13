@@ -1,5 +1,5 @@
 from dearpygui.dearpygui import *
-from enum import Enum
+
 from gui.views.core import View
 
 
@@ -20,7 +20,7 @@ class Chat(View):
                           tag="chats_list"):
             chats = ("andy", "class chagt", "dad", "barotrauma")
             for chat in chats:
-                add_button(label=chat, tag=chat, callback=lambda f="sm1": self.callback(f, "chat_place"))
+                add_button(label=chat, tag=chat, callback=lambda *, sender=chat: self.callback(sender))
 
     def create_chat_place(self) -> None:
         with child_window(label="Messages", width=get_viewport_client_width() * 0.5,
@@ -42,13 +42,13 @@ class Chat(View):
                           pos=(get_viewport_client_width() // 4, 0), tag="personal_zone"):
             add_text("no1", tag="chat_name")
 
-    def callback(self, name, parent) -> None:
-        delete_item(parent, children_only=True)
+    def callback(self, name_of_chat_epta) -> None:
+        delete_item("chat_place", children_only=True)
         with child_window(width=get_viewport_client_width() * 0.5,
                           height=get_viewport_client_width(),
-                          parent=parent, pos=(0, 0)):
-            add_text(f"chat with {name}")
-        set_value("chat_name", name)
+                          parent="chat_place", pos=(0, 0)):
+            add_text(f"chat with {name_of_chat_epta}")
+        set_value("chat_name", name_of_chat_epta)
 
     def on_sending(self, sender, data):
         inp = get_value("input")

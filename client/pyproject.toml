@@ -1,0 +1,12 @@
+[project]
+name = "messenger-with-crypting"
+version = "0.1.0"
+description = "Messenger with post-quatum encryption ept"
+readme = "README.md"
+authors = [
+    { name = "alya san", email = "jiguli.344a@gmail.com" }
+]
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "dearpygui>=2.0.0",
+]

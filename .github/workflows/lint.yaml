@@ -8,7 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv run --dev ruff format --check --diff
+      - run: |
+          cd ./client/
+          uv run --dev ruff format --check --diff
 
   check:
     needs: format
@@ -16,4 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: uv run --dev ruff check || uv run --dev ruff check --statistics
+      - run: |
+          cd ./client/
+          uv run --dev ruff check || uv run --dev ruff check --statistics

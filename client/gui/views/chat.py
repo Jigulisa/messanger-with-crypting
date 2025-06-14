@@ -8,39 +8,47 @@ class Chat(View):
     def name(self) -> str:
         return "chat"
 
+    def resize(self, width: int, height: int) -> None:
+        set_item_width("chats_list", width // 4)
+        set_item_height("chats_list", height)
+        set_item_pos("chats_list", (0, 0))
+
+        set_item_width("personal_zone", width - width // 4)
+        set_item_height("personal_zone", height // 10)
+        set_item_pos("personal_zone", (width // 4, 0))
+
+        set_item_width("chat_place", width - width // 4)
+        set_item_height("chat_place", height - height // 10 * 2)
+        set_item_pos("chat_place", (width // 4, height // 10))
+
+        set_item_width("text_place", width - width // 4)
+        set_item_height("text_place", height // 10)
+        set_item_pos("text_place", (width // 4, height - height // 10))
+
     def create(self) -> None:
         self.create_list()
+        self.create_personal_zone()
         self.create_chat_place()
         self.create_text_zone()
-        self.create_personal_zone()
 
     def create_list(self) -> None:
-        with child_window(label="Chats", width=get_viewport_client_width() // 4,
-                          pos=(0, 0),
-                          tag="chats_list"):
+        with child_window(label="Chats", tag="chats_list"):
             chats = ("andy", "class chagt", "dad", "barotrauma")
             for chat in chats:
                 add_button(label=chat, tag=chat, callback=lambda *, sender=chat: self.callback(sender))
 
+    def create_personal_zone(self):
+        with child_window(tag="personal_zone"):
+            add_text("no1", tag="chat_name")
+
     def create_chat_place(self) -> None:
-        with child_window(label="Messages", width=get_viewport_client_width() * 0.5,
-                          height=get_viewport_client_height() * 0.65,
-                          pos=(get_viewport_client_width() * 0.25, get_viewport_client_height() * 0.1),
-                          tag="chat_place"):
+        with child_window(label="Messages", tag="chat_place"):
             add_text("chat place lmao")
 
     def create_text_zone(self) -> None:
-        with child_window(label="text", width=get_viewport_client_width() * 0.5,
-                          height=get_viewport_client_height() * 0.1,
-                          pos=(get_viewport_client_width() * 0.25, get_viewport_client_height() * 0.73),
-                          tag="text_place"):
+        with child_window(label="text", tag="text_place"):
             add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆ ", tag="input")
             add_button(label="send", callback=self.on_sending)
-
-    def create_personal_zone(self):
-        with child_window(width=get_viewport_client_width() * 0.5, height=get_viewport_client_height() * 0.1,
-                          pos=(get_viewport_client_width() // 4, 0), tag="personal_zone"):
-            add_text("no1", tag="chat_name")
 
     def callback(self, name_of_chat_epta) -> None:
         delete_item("chat_place", children_only=True)

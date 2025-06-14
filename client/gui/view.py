@@ -1,3 +1,5 @@
+from typing import override
+
 from dearpygui.dearpygui import hide_item, show_item, window
 
 from gui.mixins import ResizeMixin
@@ -8,6 +10,11 @@ class View(ResizeMixin):
     @property
     def name(self) -> str:
         return "view"
+
+    @override
+    def resize(self, width: int, height: int, position: tuple[int, int]) -> None:
+        super().resize(width, height, position)
+        ViewName.CHAT.value.resize(width, height)
 
     def __init__(self) -> None:
         with window(

@@ -5,7 +5,7 @@ from dearpygui.dearpygui import child_window
 
 class View(ABC):
     def create_view(self) -> None:
-        with child_window(label=self.name, tag=self.name):
+        with child_window(label=self.name, tag=self.name, border=False):
             self.create()
 
     @property

@@ -9,7 +9,6 @@ from dearpygui.dearpygui import (
     setup_dearpygui,
     show_viewport,
 )
-
 from gui.menu import Menu
 from gui.view import View
 

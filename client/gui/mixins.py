@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import ABC, abstractmethod
 
 from dearpygui.dearpygui import set_item_height, set_item_pos, set_item_width
 

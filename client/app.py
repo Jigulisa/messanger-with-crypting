@@ -27,8 +27,8 @@ class Messenger:
 
         self.width = 0
         self.height = 0
-        self.view = View(name="view")
-        self.menu = Menu(name="menu", callback=self.view.show_view)
+        self.view = View()
+        self.menu = Menu(callback=self.view.show_view)
 
         setup_dearpygui()
         show_viewport()

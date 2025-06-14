@@ -5,11 +5,14 @@ from gui.views.view_name import ViewName
 
 
 class View(ResizeMixin):
-    def __init__(self, name: str) -> None:
-        self.name = name
+    @property
+    def name(self) -> str:
+        return "view"
+
+    def __init__(self) -> None:
         with window(
-            label=name,
-            tag=name,
+            label=self.name,
+            tag=self.name,
             min_size=(0, 0),
             no_resize=True,
             no_title_bar=True,

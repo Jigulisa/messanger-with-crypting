@@ -7,11 +7,14 @@ from gui.views.view_name import ViewName
 
 
 class Menu(ResizeMixin):
-    def __init__(self, name: str, callback: Callable[[ViewName], None]) -> None:
-        self.name = name
+    @property
+    def name(self) -> str:
+        return "menu"
+
+    def __init__(self, callback: Callable[[ViewName], None]) -> None:
         with window(
-                label=name,
-                tag=name,
+                label=self.name,
+                tag=self.name,
                 min_size=(0, 0),
                 no_resize=True,
                 no_title_bar=True,

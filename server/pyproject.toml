@@ -1,0 +1,23 @@
+[project]
+name = "messenger-with-crypting"
+version = "0.1.0"
+description = "Messenger with post-quatum encryption ept"
+readme = "README.md"
+authors = [
+    { name = "alya san", email = "jiguli.344a@gmail.com" }
+]
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "litestar[pydantic,redis,sqlalchemy]>=2.16.0",
+    "uvicorn>=0.34.3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.13",
+]
+
+[tool.ruff]
+src = ["./main.py"]
+lint.select = ["ALL"]
+lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]

@@ -1,10 +1,9 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from uvicorn import run
 from datetime import datetime
-from time import sleep
 from random import randint
 from message_struct import Message
-
+from asyncio import sleep
 app = FastAPI()
 
 
@@ -18,7 +17,7 @@ async def websocket_endpoint(websocket: WebSocket):
             msg = Message(message=str(randint(0, 100)), sent_time=datetime.now(), author="alya", chat_id=randint(25, 28), spam=False)
             await websocket.send_text(msg.json())
             print(f"data sent at {datetime.now().time()}")
-            sleep(randint(5, 25))
+            await sleep(randint(5, 25))
     except WebSocketDisconnect:
         print(f"Client {client_host} disconnected\nCURRENT TIME: {datetime.now().time()}")
 

@@ -52,9 +52,7 @@ class Chat(View):
 
     def callback(self, name_of_chat_epta) -> None:
         delete_item("chat_place", children_only=True)
-        with child_window(width=get_viewport_client_width() * 0.5,
-                          height=get_viewport_client_width(),
-                          parent="chat_place", pos=(0, 0)):
+        with child_window(parent="chat_place"):
             add_text(f"chat with {name_of_chat_epta}")
         set_value("chat_name", name_of_chat_epta)
 

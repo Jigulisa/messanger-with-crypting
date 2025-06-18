@@ -18,7 +18,11 @@ from gui.view import View
 
 class Messenger:
     def __init__(
-        self, width: int, height: int, queue_send: Queue, queue_receive: Queue,
+        self,
+        width: int,
+        height: int,
+        queue_send: Queue,
+        queue_receive: Queue,
     ) -> None:
         create_context()
         create_viewport(

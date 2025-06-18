@@ -59,4 +59,4 @@ class Chat(View):
     def on_sending(self, sender, data):
         inp = get_value("input")
         set_value("input", "")
-        print(inp)  # replace with sending to server
+

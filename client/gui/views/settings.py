@@ -49,7 +49,7 @@ class Settings(View):
     def fill_in_form(self):
         add_button(label="Fill in form", callback=self.on_form)
     def on_background(self, sender, data):
-        file_path = data['file_path_name']
+        file_path = data["file_path_name"]
         set_value("selected_file_text", f"selected {file_path.split("\\")[-1]}")
 
     def on_m2_color(self, sender, data):
@@ -68,6 +68,6 @@ class Settings(View):
         pass
 
     def cancel_callback(self, sender, app_data):
-        print('Cancel was clicked.')
+        print("Cancel was clicked.")
         print("Sender: ", sender)
         print("App Data: ", app_data)

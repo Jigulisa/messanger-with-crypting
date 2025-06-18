@@ -1,35 +1,37 @@
-import asyncio
-from websockets import connect, ConnectionClosed
-from datetime import datetime
+from asyncio import run, gather
+from contextlib import suppress
+from threading import Thread
+from typing import Any, Self, override
+from queue import Queue, Empty
+from websockets import connect, ClientConnection
 
 
-class WebSocketClient:
-    def __init__(self, url):
-        self.url = url
+class WebSocketClient(Thread):
+    @override
+    def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.queue_send_messages = Queue()
+        self.queue_recieve_messages = Queue()
 
-    async def connect(self) -> None:
-        self.connection = await connect(self.url)
-        print(f"Connected to server\nCURRENT TIME: {datetime.now().time()}")
+    def get_queues(self: Self) -> tuple[Queue, Queue]:
+        return self.queue_send_messages, self.queue_recieve_messages
 
-    async def listen(self):
-        try:
-            async for data in self.connection:
-                print(f"Received message: {data}\nCURRENT TIME: {datetime.now().time()}")
+    @override
+    def run(self) -> None:
+        run(self.main())
 
-        except ConnectionClosed:
-            print("Oops, Connection closed")
+    async def main(self: Self) -> None:
+        async with connect("ws://127.0.0.1:8000/messages") as websocket:
+            await gather(
+                self.send_messages(websocket),
+                self.recieve_messages(websocket),
+            )
 
-    async def send(self, message):
-        if self.connection:
-            await self.connection.send(message)
-            print(f"Sent message: {message}\nCURRENT TIME: {datetime.now().time()}")
+    async def send_messages(self: Self, websocket: ClientConnection) -> None:
+        while True:
+            with suppress(Empty):
+                await websocket.send(self.queue_send_messages.get_nowait())
 
-    async def run(self):
-        await self.connect()
-        await self.listen()
-
-
-if __name__ == "__main__":
-    uri = "ws://localhost:8000/ws"
-    client = WebSocketClient(uri)
-    asyncio.run(client.run())
+    async def recieve_messages(self: Self, websocket: ClientConnection) -> None:
+        while True:
+            self.queue_recieve_messages.put(await websocket.recv())

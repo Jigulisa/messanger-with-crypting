@@ -1,9 +1,10 @@
-from asyncio import run, gather
+from asyncio import gather, run
 from contextlib import suppress
+from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
-from queue import Queue, Empty
-from websockets import connect, ClientConnection
+
+from websockets import ClientConnection, connect
 
 
 class WebSocketClient(Thread):

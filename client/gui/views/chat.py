@@ -35,7 +35,11 @@ class Chat(View):
         with child_window(label="Chats", tag="chats_list"):
             chats = ("andy", "class chagt", "dad", "barotrauma")
             for chat in chats:
-                add_button(label=chat, tag=chat, callback=lambda *, sender=chat: self.callback(sender))
+                add_button(
+                    label=chat,
+                    tag=chat,
+                    callback=lambda *, sender=chat: self.callback(sender),
+                )
 
     def create_personal_zone(self):
         with child_window(tag="personal_zone"):
@@ -59,4 +63,3 @@ class Chat(View):
     def on_sending(self, sender, data):
         inp = get_value("input")
         set_value("input", "")
-

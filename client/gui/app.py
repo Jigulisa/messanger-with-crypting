@@ -1,3 +1,5 @@
+from queue import Queue
+
 from dearpygui.dearpygui import (
     create_context,
     create_viewport,
@@ -12,11 +14,12 @@ from dearpygui.dearpygui import (
 
 from gui.menu import Menu
 from gui.view import View
-from queue import Queue
 
 
 class Messenger:
-    def __init__(self, width: int, height: int, queue_send: Queue, queue_receive: Queue) -> None:
+    def __init__(
+        self, width: int, height: int, queue_send: Queue, queue_receive: Queue,
+    ) -> None:
         create_context()
         create_viewport(
             title="Cryptogramm",

@@ -13,12 +13,12 @@ class Menu(ResizeMixin):
 
     def __init__(self, callback: Callable[[ViewName], None]) -> None:
         with window(
-                label=self.name,
-                tag=self.name,
-                min_size=(0, 0),
-                no_resize=True,
-                no_title_bar=True,
-                no_move=True,
+            label=self.name,
+            tag=self.name,
+            min_size=(0, 0),
+            no_resize=True,
+            no_title_bar=True,
+            no_move=True,
         ):
             self.create_menu(callback)
 

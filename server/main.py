@@ -1,19 +1,103 @@
+from base64 import b85decode
 from collections.abc import AsyncGenerator
-from contextlib import asynccontextmanager
-from typing import Self
+from contextlib import asynccontextmanager, suppress
+from datetime import UTC, datetime, timedelta
+from typing import Any, Self, override
 
-from litestar import Litestar, WebSocket
+from litestar import Litestar, WebSocket, websocket_listener
 from litestar.channels import ChannelsPlugin
 from litestar.channels.backends.memory import MemoryChannelsBackend
-from litestar.handlers import websocket_listener
+from litestar.connection import ASGIConnection
+from litestar.exceptions import NotAuthorizedException, WebSocketDisconnect
+from litestar.middleware import DefineMiddleware
+from litestar.middleware.authentication import (
+    AbstractAuthenticationMiddleware,
+    AuthenticationResult,
+)
+from litestar.stores.memory import MemoryStore
+from oqs import Signature
+from pydantic import BaseModel, ValidationError
 
 
-class ChannelCallback:
+class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
+    @override
+    def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.store = MemoryStore()
+
+    @staticmethod
+    def get_header(connection: ASGIConnection, header: str) -> str:
+        value = connection.headers.get(header)
+        if value is None:
+            raise NotAuthorizedException
+        return value
+
+    async def authenticate_request(
+        self: Self,
+        connection: ASGIConnection,
+    ) -> AuthenticationResult:
+        timestamp = datetime.fromisoformat(self.get_header(connection, "X-Timestamp"))
+        if datetime.now(tz=UTC) - timestamp > timedelta(minutes=1):
+            raise NotAuthorizedException
+
+        public_key = self.get_header(connection, "X-Public-Key")
+        nonce = self.get_header(connection, "X-Nonce")
+        key = f"{public_key}:{nonce}"
+
+        if await self.store.exists(key):
+            raise NotAuthorizedException
+        await self.store.set(
+            key,
+            value="",
+            expires_in=timedelta(minutes=1),
+        )
+
+        signature = self.get_header(connection, "X-Signature")
+        with Signature("ML-DSA-87") as verifier:
+            is_valid = verifier.verify(
+                b85decode(nonce),
+                b85decode(signature),
+                b85decode(public_key),
+            )
+        if not is_valid:
+            raise NotAuthorizedException
+
+        return AuthenticationResult(user=public_key, auth=public_key)
+
+
+class PrivateMessage(BaseModel):
+    message: str
+    sent_time: datetime
+    author: str
+    recieve_id: str
+    spam: bool
+    signature: str
+
+
+class MessageCallback:
     def __init__(self: Self, socket: WebSocket) -> None:
         self.socket = socket
 
+    @staticmethod
+    def validate(data: bytes) -> PrivateMessage | None:
+        try:
+            message = PrivateMessage.model_validate_json(data)
+        except ValidationError:
+            return None
+        with Signature("ML-DSA-87") as verifier:
+            is_valid = verifier.verify(
+                message.model_dump_json(exclude={"signature"}).encode(),
+                b85decode(message.signature),
+                b85decode(message.author),
+            )
+        return message if is_valid else None
+
     async def __call__(self: Self, data: bytes) -> None:
-        await self.socket.send_data(data)
+        message = self.validate(data)
+        if message is None:
+            return
+        if self.socket.auth in {message.recieve_id, message.author}:
+            await self.socket.send_data(message.model_dump_json())
 
 
 @asynccontextmanager
@@ -22,18 +106,22 @@ async def connection_lifespan(
     channels: ChannelsPlugin,
 ) -> AsyncGenerator[None]:
     async with (
-        channels.start_subscription("channel") as subscriber,
-        subscriber.run_in_background(ChannelCallback(socket)),
+        channels.start_subscription("messages_channel") as subscriber,
+        subscriber.run_in_background(MessageCallback(socket)),
     ):
-        yield
+        with suppress(WebSocketDisconnect):
+            yield
 
 
-@websocket_listener("/", connection_lifespan=connection_lifespan)
-async def handler(data: str, channels: ChannelsPlugin) -> None:
-    await channels.wait_published(data, "channel")
+@websocket_listener("/messages", connection_lifespan=connection_lifespan)
+async def messages(data: str, channels: ChannelsPlugin) -> None:
+    await channels.wait_published(data, "messages_channel")
 
 
 app = Litestar(
-    route_handlers=[handler],
-    plugins=[ChannelsPlugin(backend=MemoryChannelsBackend(), channels=["channel"])],
+    route_handlers=[messages],
+    plugins=[
+        ChannelsPlugin(backend=MemoryChannelsBackend(), channels=["messages_channel"]),
+    ],
+    middleware=[DefineMiddleware(AuthenticationMiddleware)],
 )

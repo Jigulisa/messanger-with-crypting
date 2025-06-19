@@ -47,7 +47,7 @@ class Chat(View):
 
     def create_text_zone(self) -> None:
         with child_window(label="text", tag="text_place"):
-            add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆ ", tag="input")
+            add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
             add_button(label="send", callback=self.on_sending)
 
     def callback(self, name_of_chat_epta) -> None:

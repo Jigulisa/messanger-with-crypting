@@ -4,7 +4,12 @@ from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
 
+from oqs import Signature
+from pydantic import ValidationError
 from websockets import ClientConnection, connect
+
+from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from settings.settings import Settings
 
 
 class WebSocketClient(Thread):
@@ -14,7 +19,9 @@ class WebSocketClient(Thread):
         self.queue_send_messages = Queue()
         self.queue_recieve_messages = Queue()
 
-    def get_queues(self: Self) -> tuple[Queue, Queue]:
+    def get_queues(
+        self: Self,
+    ) -> tuple[Queue[SentPrivateMessage], Queue[ReceivedPrivateMessage]]:
         return self.queue_send_messages, self.queue_recieve_messages
 
     @override
@@ -31,8 +38,18 @@ class WebSocketClient(Thread):
     async def send_messages(self: Self, websocket: ClientConnection) -> None:
         while True:
             with suppress(Empty):
-                await websocket.send(self.queue_send_messages.get_nowait())
+                message = self.queue_send_messages.get_nowait()
+                with Signature("ML-DSA-87", Settings.get_private_key_bytes()) as signer:
+                    signature = signer.sign(
+                        message.model_dump_json(exclude={"signature"}).encode(),
+                    )
+                message.signature = signature
+                message_json = message.model_dump_json()
+                await websocket.send(message_json)
 
     async def recieve_messages(self: Self, websocket: ClientConnection) -> None:
         while True:
-            self.queue_recieve_messages.put(await websocket.recv())
+            message = await websocket.recv()
+            with suppress(ValidationError):
+                message_stuct = ReceivedPrivateMessage.model_validate_json(message)
+                self.queue_recieve_messages.put(message_stuct)

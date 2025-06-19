@@ -9,4 +9,3 @@ class ViewName(Enum):
     CHAT = Chat()
     SETTINGS = Settings()
     STORAGE = Storage()
-

@@ -3,7 +3,7 @@ name: Lint
 on: [push, pull_request]
 
 jobs:
-  format:
+  format-client:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -11,13 +11,32 @@ jobs:
       - run: |
           cd ./client/
           uv run --dev ruff format --check --diff
+  
+  format-server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          cd ./server/
+          uv run --dev ruff format --check --diff
 
-  check:
-    needs: format
+  check-client:
+    needs: format-client
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
       - run: |
           cd ./client/
+          uv run --dev ruff check || uv run --dev ruff check --statistics
+
+  check-server:
+    needs: format-server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          cd ./server/
           uv run --dev ruff check || uv run --dev ruff check --statistics

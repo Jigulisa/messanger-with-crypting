@@ -51,12 +51,14 @@ class WebSocketClient(Thread):
     async def receive_messages(self: Self, websocket: ClientConnection) -> None:
         while True:
             message = await websocket.recv()
-            with Signature("ML-DSA-87") as verifier:
-                is_valid = verifier.verify(
-                    b85decode(message),
-                    b85decode(ReceivedPrivateMessage.model_validate_json(message).signature),
-                    b85decode(public_key),
-                )
             with suppress(ValidationError):
-                message_stuct = ReceivedPrivateMessage.model_validate_json(message)
-                self.queue_receive_messages.put(message_stuct)
+                with Signature("ML-DSA-87") as verifier:
+                    is_valid = verifier.verify(
+                        b85decode(message),
+                        b85decode(ReceivedPrivateMessage.model_validate_json(message).signature),
+                        b85decode(ReceivedPrivateMessage.model_validate_json(message).author),
+                    )
+            if is_valid:
+                with suppress(ValidationError):
+                    message_stuct = ReceivedPrivateMessage.model_validate_json(message)
+                    self.queue_receive_messages.put(message_stuct)

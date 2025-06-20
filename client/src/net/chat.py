@@ -1,4 +1,5 @@
 from asyncio import gather, run
+from base64 import b85decode
 from contextlib import suppress
 from queue import Empty, Queue
 from threading import Thread
@@ -17,12 +18,12 @@ class WebSocketClient(Thread):
     def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.queue_send_messages = Queue()
-        self.queue_recieve_messages = Queue()
+        self.queue_receive_messages = Queue()
 
     def get_queues(
         self: Self,
     ) -> tuple[Queue[SentPrivateMessage], Queue[ReceivedPrivateMessage]]:
-        return self.queue_send_messages, self.queue_recieve_messages
+        return self.queue_send_messages, self.queue_receive_messages
 
     @override
     def run(self) -> None:
@@ -47,9 +48,15 @@ class WebSocketClient(Thread):
                 message_json = message.model_dump_json()
                 await websocket.send(message_json)
 
-    async def recieve_messages(self: Self, websocket: ClientConnection) -> None:
+    async def receive_messages(self: Self, websocket: ClientConnection) -> None:
         while True:
             message = await websocket.recv()
+            with Signature("ML-DSA-87") as verifier:
+                is_valid = verifier.verify(
+                    b85decode(message),
+                    b85decode(ReceivedPrivateMessage.model_validate_json(message).signature),
+                    b85decode(public_key),
+                )
             with suppress(ValidationError):
                 message_stuct = ReceivedPrivateMessage.model_validate_json(message)
-                self.queue_recieve_messages.put(message_stuct)
+                self.queue_receive_messages.put(message_stuct)

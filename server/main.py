@@ -16,7 +16,8 @@ from litestar.middleware.authentication import (
 )
 from litestar.stores.memory import MemoryStore
 from oqs import Signature
-from pydantic import BaseModel, ValidationError
+
+from message_callback import MessageCallback
 
 
 class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
@@ -64,40 +65,6 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
 
         return AuthenticationResult(user=public_key, auth=public_key)
 
-
-class PrivateMessage(BaseModel):
-    message: str
-    sent_time: datetime
-    author: str
-    recieve_id: str
-    spam: bool
-    signature: str
-
-
-class MessageCallback:
-    def __init__(self: Self, socket: WebSocket) -> None:
-        self.socket = socket
-
-    @staticmethod
-    def validate(data: bytes) -> PrivateMessage | None:
-        try:
-            message = PrivateMessage.model_validate_json(data)
-        except ValidationError:
-            return None
-        with Signature("ML-DSA-87") as verifier:
-            is_valid = verifier.verify(
-                message.model_dump_json(exclude={"signature"}).encode(),
-                b85decode(message.signature),
-                b85decode(message.author),
-            )
-        return message if is_valid else None
-
-    async def __call__(self: Self, data: bytes) -> None:
-        message = self.validate(data)
-        if message is None:
-            return
-        if self.socket.auth in {message.recieve_id, message.author}:
-            await self.socket.send_data(message.model_dump_json())
 
 
 @asynccontextmanager

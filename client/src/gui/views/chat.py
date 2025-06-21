@@ -46,13 +46,14 @@ class Chat(View):
             add_text("no1", tag="chat_name")
 
     def create_chat_place(self) -> None:
-        with child_window(label="Messages", tag="chat_place"):
-            add_text("chat place lmao")
+        with child_window(label="Messages", tag="chat_place", border=False):
+            add_group(tag="message_group")
+
 
     def create_text_zone(self) -> None:
         with child_window(label="text", tag="text_place"):
             add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
-            add_button(label="send", callback=self.on_sending)
+            add_button(label="send", callback=lambda: self.on_new_message)
 
     def callback(self, name_of_chat_epta) -> None:
         delete_item("chat_place", children_only=True)
@@ -60,6 +61,18 @@ class Chat(View):
             add_text(f"chat with {name_of_chat_epta}")
         set_value("chat_name", name_of_chat_epta)
 
-    def on_sending(self, sender, data):
-        inp = get_value("input")
+    async def on_sending(self):
+        inp = await get_value("input")
         set_value("input", "")
+        add_text(inp, parent="message_group")
+        set_value("message_input", "")
+        set_y_scroll("chat_child", get_y_scroll_max("chat_child") + 25)
+
+
+    async def on_receiving(self):
+        inp = await
+
+    async def on_new_message(self):
+        while True:
+            await self.on_sending()
+            await self.on_receiving()

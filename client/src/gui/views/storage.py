@@ -1,4 +1,4 @@
-from dearpygui.dearpygui import add_text
+from dearpygui.dearpygui import *
 
 from gui.views.core import View
 

@@ -9,14 +9,15 @@ authors = [
 requires-python = ">=3.13, <3.14"
 dependencies = [
     "dearpygui>=2.0.0",
+    #     "liboqs-python",
     "liboqs-python",
     "msgspec[toml]>=0.19.0",
     "pydantic>=2.11.7",
     "websockets>=15.0.1",
 ]
 
-[tool.uv.sources]
-liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }
+# [tool.uv.sources]
+# liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }
 
 [dependency-groups]
 dev = [
@@ -27,3 +28,6 @@ dev = [
 src = ["./src/"]
 lint.select = ["ALL"]
 lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]
+
+[tool.uv.sources]
+liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }

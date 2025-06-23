@@ -1,21 +1,34 @@
 from base64 import b85decode, b85encode
 
-from oqs import Signature
+from secure.signature import generate_keypair
 
 
 class KeysMixin:
     @staticmethod
-    def get_private_key() -> str:
+    def get_private_key() -> bytes:
         from settings.settings import Settings
 
         private_key = Settings.get_value("private_key")
 
         if private_key is not None:
-            return private_key
+            return b85decode(private_key)
 
-        with Signature("ML-DSA-87") as signer:
-            return b85encode(signer.export_secret_key()).decode()
+        private_key, public_key = generate_keypair()
+        Settings.set_value("private_key", b85encode(private_key).decode())
+        Settings.set_value("public_key", b85encode(public_key).decode())
+        return private_key
 
     @staticmethod
-    def get_private_key_bytes() -> bytes:
-        return b85decode(KeysMixin.get_private_key())
+    def get_public_key() -> str:
+        from settings.settings import Settings
+
+        public_key = Settings.get_value("public_key")
+        
+        if public_key is not None:
+            return b85encode(public_key).decode()
+        
+        private_key, public_key = generate_keypair()
+        public_key_str = b85encode(public_key).decode()
+        Settings.set_value("private_key", b85encode(private_key).decode())
+        Settings.set_value("public_key", public_key_str)
+        return public_key_str

@@ -1,5 +1,5 @@
-from queue import Queue
-
+from contextlib import suppress
+from queue import Empty, Queue
 from dearpygui.dearpygui import (
     create_context,
     create_viewport,
@@ -11,7 +11,7 @@ from dearpygui.dearpygui import (
     setup_dearpygui,
     show_viewport,
 )
-
+from gui.views.view_name import ViewName
 from gui.menu import Menu
 from gui.view import View
 
@@ -32,12 +32,13 @@ class Messenger:
             min_width=0,
             min_height=0,
         )
-
+        
         self.width = 0
         self.height = 0
+        ViewName.CHAT.value.queue_send = queue_send
         self.view = View()
         self.menu = Menu(callback=self.view.show_view)
-
+        self.queue_receive = queue_receive
         setup_dearpygui()
         show_viewport()
 
@@ -62,7 +63,8 @@ class Messenger:
 
             if width != self.width or height != self.height:
                 self.resize(width, height)
-
+            with suppress(Empty):
+                ViewName.CHAT.value.on_receiving(self.queue_receive.get_nowait())
             render_dearpygui_frame()
 
         destroy_context()

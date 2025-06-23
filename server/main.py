@@ -38,7 +38,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
         connection: ASGIConnection,
     ) -> AuthenticationResult:
         timestamp = datetime.fromisoformat(self.get_header(connection, "X-Timestamp"))
-        if datetime.now(tz=UTC) - timestamp > timedelta(minutes=1):
+        if datetime.now(UTC) - timestamp > timedelta(minutes=1):
             raise NotAuthorizedException
 
         public_key = self.get_header(connection, "X-Public-Key")
@@ -64,7 +64,6 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException
 
         return AuthenticationResult(user=public_key, auth=public_key)
-
 
 
 @asynccontextmanager

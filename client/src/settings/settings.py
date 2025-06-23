@@ -27,7 +27,7 @@ class Settings(KeysMixin):
         if key in data:
             return data[key]
 
-        return Settings.set_value(key, default)
+        return default if default is None else Settings.set_value(key, default)
 
     @staticmethod
     def set_value[T](key: str, value: T) -> T:

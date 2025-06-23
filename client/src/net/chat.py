@@ -5,12 +5,12 @@ from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
 
-from oqs import Signature
 from pydantic import ValidationError
 from websockets import ClientConnection, connect
 
 from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
 from settings.settings import Settings
+from secure.signature import sign, verify
 
 
 class WebSocketClient(Thread):
@@ -28,23 +28,27 @@ class WebSocketClient(Thread):
     @override
     def run(self) -> None:
         run(self.main())
+    
+    def get_auth_headers(self: Self) -> dict[str, str]:
+        return {
+            
+        }
 
     async def main(self: Self) -> None:
         async with connect("ws://127.0.0.1:8000/messages") as websocket:
             await gather(
                 self.send_messages(websocket),
-                self.recieve_messages(websocket),
+                self.receive_messages(websocket),
             )
 
     async def send_messages(self: Self, websocket: ClientConnection) -> None:
         while True:
             with suppress(Empty):
                 message = self.queue_send_messages.get_nowait()
-                with Signature("ML-DSA-87", Settings.get_private_key_bytes()) as signer:
-                    signature = signer.sign(
-                        message.model_dump_json(exclude={"signature"}).encode(),
-                    )
-                message.signature = signature
+                message.signature = sign(
+                    message.model_dump_json(exclude={"signature"}).encode(),
+                    Settings.get_private_key(),
+                )
                 message_json = message.model_dump_json()
                 await websocket.send(message_json)
 
@@ -55,11 +59,11 @@ class WebSocketClient(Thread):
                 message_stuct = ReceivedPrivateMessage.model_validate_json(message)
             except ValidationError:
                 continue
-            with Signature("ML-DSA-87") as verifier:
-                is_valid = verifier.verify(
-                    message_stuct.model_dump_json(exclude={"signature", "spam"}).encode(),
-                    b85decode(message_stuct.signature),
-                    b85decode(message_stuct.author),
-                )
+
+            is_valid = verify(
+                message_stuct.model_dump_json(exclude={"signature", "spam"}).encode(),
+                b85decode(message_stuct.signature),
+                b85decode(message_stuct.author),
+            )
             if is_valid:
                 self.queue_receive_messages.put(message_stuct)

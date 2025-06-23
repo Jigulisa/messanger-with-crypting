@@ -1,9 +1,16 @@
 from dearpygui.dearpygui import *
-
+from datetime import datetime, UTC
+from queue import Queue
 from gui.views.core import View
+from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from settings import Settings
 
 
 class Chat(View):
+    def __init__(self):
+        self.queue_send = Queue()
+        self.current_chat = ""
+
     @property
     def name(self) -> str:
         return "chat"
@@ -36,7 +43,7 @@ class Chat(View):
             chats = ("andy", "class chagt", "dad", "barotrauma")
             for chat in chats:
                 add_button(
-                    label=chat,
+                    label=chat[:6],
                     tag=chat,
                     callback=lambda *, sender=chat: self.callback(sender),
                 )
@@ -49,30 +56,30 @@ class Chat(View):
         with child_window(label="Messages", tag="chat_place", border=False):
             add_group(tag="message_group")
 
-
     def create_text_zone(self) -> None:
         with child_window(label="text", tag="text_place"):
             add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
-            add_button(label="send", callback=lambda: self.on_new_message)
+            add_button(label="send", callback=lambda: self.on_sending())
 
     def callback(self, name_of_chat_epta) -> None:
         delete_item("chat_place", children_only=True)
-        with child_window(parent="chat_place"):
-            add_text(f"chat with {name_of_chat_epta}")
-        set_value("chat_name", name_of_chat_epta)
+        set_value("chat_name", name_of_chat_epta[:6])
+        self.current_chat = name_of_chat_epta
 
-    async def on_sending(self):
-        inp = await get_value("input")
+    def on_sending(self):
+        print("evrrev")
+        inp = get_value("input")
         set_value("input", "")
-        add_text(inp, parent="message_group")
-        set_value("message_input", "")
+        self.queue_send.put(
+            SentPrivateMessage(
+                message=inp,
+                sent_time=datetime.now(UTC),
+                author=Settings.get_public_key(),
+                recieve_id=self.current_chat,
+                signature=""
+            )
+        )
+
+    def on_receiving(self, message: ReceivedPrivateMessage):
+        add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
         set_y_scroll("chat_child", get_y_scroll_max("chat_child") + 25)
-
-
-    async def on_receiving(self):
-        inp = await
-
-    async def on_new_message(self):
-        while True:
-            await self.on_sending()
-            await self.on_receiving()

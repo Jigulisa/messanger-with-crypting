@@ -28,11 +28,9 @@ class WebSocketClient(Thread):
     @override
     def run(self) -> None:
         run(self.main())
-    
+
     def get_auth_headers(self: Self) -> dict[str, str]:
-        return {
-            
-        }
+        return {}
 
     async def main(self: Self) -> None:
         async with connect("ws://127.0.0.1:8000/messages") as websocket:

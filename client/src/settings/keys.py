@@ -23,10 +23,10 @@ class KeysMixin:
         from settings.settings import Settings
 
         public_key = Settings.get_value("public_key")
-        
+
         if public_key is not None:
             return b85encode(public_key).decode()
-        
+
         private_key, public_key = generate_keypair()
         public_key_str = b85encode(public_key).decode()
         Settings.set_value("private_key", b85encode(private_key).decode())

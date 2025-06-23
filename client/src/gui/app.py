@@ -32,7 +32,7 @@ class Messenger:
             min_width=0,
             min_height=0,
         )
-        
+
         self.width = 0
         self.height = 0
         ViewName.CHAT.value.queue_send = queue_send

@@ -76,7 +76,7 @@ class Chat(View):
                 sent_time=datetime.now(UTC),
                 author=Settings.get_public_key(),
                 recieve_id=self.current_chat,
-                signature=""
+                signature="",
             )
         )
 

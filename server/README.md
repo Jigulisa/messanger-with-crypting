@@ -1,3 +1,3 @@
 # Messenger with crypting
-## for those who cares about their privacy
+## for those who care about their privacy
 ^ 3^

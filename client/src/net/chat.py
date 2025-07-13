@@ -94,7 +94,7 @@ class WebSocketClient(Thread):
 
             is_valid = verify(
                 verified_message.model_dump_json(
-                    exclude={"signature", "spam"},
+                    exclude={"signature"},
                 ).encode(),
                 b85decode(verified_message.signature),
                 b85decode(verified_message.author),

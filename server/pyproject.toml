@@ -1,18 +1,16 @@
 [project]
 name = "messenger-with-crypting"
 version = "0.1.0"
-description = "Messenger with post-quatum encryption ept"
+description = "Messenger with post-quantum encryption"
 readme = "README.md"
 authors = [
     { name = "alya san", email = "jiguli.344a@gmail.com" }
 ]
 requires-python = ">=3.13, <3.14"
 dependencies = [
-    "dearpygui",
     "liboqs-python",
-    "msgspec[toml]",
-    "pydantic",
-    "websockets",
+    "litestar[pydantic,redis,sqlalchemy]",
+    "uvicorn[standard]",
 ]
 
 [tool.uv.sources]
@@ -24,7 +22,6 @@ dev = [
 ]
 
 [tool.ruff]
-src = ["./src/"]
-extend-exclude = ["*.ipynb"]
+src = ["./main.py"]
 lint.select = ["ALL"]
 lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]

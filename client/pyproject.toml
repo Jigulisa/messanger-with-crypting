@@ -1,7 +1,7 @@
 [project]
 name = "messenger-with-crypting"
 version = "0.1.0"
-description = "Messenger with post-quatum encryption ept"
+description = "Messenger with post-quantum encryption"
 readme = "README.md"
 authors = [
     { name = "alya san", email = "jiguli.344a@gmail.com" }

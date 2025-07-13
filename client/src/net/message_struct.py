@@ -7,7 +7,7 @@ class SentPrivateMessage(BaseModel):
     message: str
     sent_time: datetime
     author: str
-    recieve_id: str
+    receive_id: str
     signature: str
 
 

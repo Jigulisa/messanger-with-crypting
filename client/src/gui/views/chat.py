@@ -78,10 +78,10 @@ class Chat(View):
             add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
             add_button(label="send", callback=lambda: self.on_sending())
 
-    def callback(self: Self, name_of_chat_epta: str) -> None:
+    def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)
-        set_value("chat_name", name_of_chat_epta[:6])
-        self.current_chat = name_of_chat_epta
+        set_value("chat_name", selected_chat[:6])
+        self.current_chat = selected_chat
 
     def on_sending(self: Self) -> None:
         inp = get_value("input")

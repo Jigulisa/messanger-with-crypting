@@ -1,0 +1,30 @@
+[project]
+name = "messenger-with-crypting"
+version = "0.1.0"
+description = "Messenger with post-quantum encryption"
+readme = "README.md"
+authors = [
+    { name = "alya san", email = "jiguli.344a@gmail.com" }
+]
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "dearpygui",
+    "liboqs-python",
+    "msgspec[toml]",
+    "pydantic",
+    "websockets",
+]
+
+[tool.uv.sources]
+liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }
+
+[dependency-groups]
+dev = [
+    "ruff",
+]
+
+[tool.ruff]
+src = ["./src/"]
+extend-exclude = ["*.ipynb"]
+lint.select = ["ALL"]
+lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]

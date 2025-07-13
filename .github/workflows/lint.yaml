@@ -10,7 +10,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: |
           cd ./client/
-          uv run ruff --version
+          uv run --dev ruff --version
           uv run --dev ruff format --check --diff
   
   format-server:
@@ -20,7 +20,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: |
           cd ./server/
-          uv run ruff --version
+          uv run --dev ruff --version
           uv run --dev ruff format --check --diff
 
   check-client:
@@ -31,7 +31,7 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: |
           cd ./client/
-          uv run ruff --version
+          uv run --dev ruff --version
           uv run --dev ruff check || uv run --dev ruff check --statistics
 
   check-server:
@@ -42,5 +42,5 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: |
           cd ./server/
-          uv run ruff --version
+          uv run --dev ruff --version
           uv run --dev ruff check || uv run --dev ruff check --statistics

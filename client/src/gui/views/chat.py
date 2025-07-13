@@ -1,44 +1,61 @@
-from dearpygui.dearpygui import *
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from queue import Queue
+from typing import Self
+
+from dearpygui.dearpygui import (
+    add_button,
+    add_group,
+    add_input_text,
+    add_text,
+    child_window,
+    delete_item,
+    get_value,
+    get_y_scroll_max,
+    set_item_height,
+    set_item_pos,
+    set_item_width,
+    set_value,
+    set_y_scroll,
+)
+
 from gui.views.core import View
 from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
 from settings import Settings
 
 
 class Chat(View):
-    def __init__(self):
+    def __init__(self: Self) -> None:
         self.queue_send = Queue()
         self.current_chat = ""
 
     @property
-    def name(self) -> str:
+    def name(self: Self) -> str:
         return "chat"
 
-    def resize(self, width: int, height: int) -> None:
+    def resize(self: Self, width: int, height: int) -> None:
         set_item_width("chats_list", width // 4)
         set_item_height("chats_list", height)
-        set_item_pos("chats_list", (0, 0))
+        set_item_pos("chats_list", [0, 0])
 
         set_item_width("personal_zone", width - width // 4)
         set_item_height("personal_zone", height // 10)
-        set_item_pos("personal_zone", (width // 4, 0))
+        set_item_pos("personal_zone", [width // 4, 0])
 
         set_item_width("chat_place", width - width // 4)
         set_item_height("chat_place", height - height // 10 * 2)
-        set_item_pos("chat_place", (width // 4, height // 10))
+        set_item_pos("chat_place", [width // 4, height // 10])
 
         set_item_width("text_place", width - width // 4)
         set_item_height("text_place", height // 10)
-        set_item_pos("text_place", (width // 4, height - height // 10))
+        set_item_pos("text_place", [width // 4, height - height // 10])
 
-    def create(self) -> None:
+    def create(self: Self) -> None:
         self.create_list()
         self.create_personal_zone()
         self.create_chat_place()
         self.create_text_zone()
 
-    def create_list(self) -> None:
+    def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
             chats = ("andy", "class chagt", "dad", "barotrauma")
             for chat in chats:
@@ -48,26 +65,25 @@ class Chat(View):
                     callback=lambda *, sender=chat: self.callback(sender),
                 )
 
-    def create_personal_zone(self):
+    def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
             add_text("no1", tag="chat_name")
 
-    def create_chat_place(self) -> None:
+    def create_chat_place(self: Self) -> None:
         with child_window(label="Messages", tag="chat_place", border=False):
             add_group(tag="message_group")
 
-    def create_text_zone(self) -> None:
+    def create_text_zone(self: Self) -> None:
         with child_window(label="text", tag="text_place"):
             add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
             add_button(label="send", callback=lambda: self.on_sending())
 
-    def callback(self, name_of_chat_epta) -> None:
-        delete_item("chat_place", children_only=True)
+    def callback(self: Self, name_of_chat_epta: str) -> None:
+        delete_item("message_group", children_only=True)
         set_value("chat_name", name_of_chat_epta[:6])
         self.current_chat = name_of_chat_epta
 
-    def on_sending(self):
-        print("evrrev")
+    def on_sending(self: Self) -> None:
         inp = get_value("input")
         set_value("input", "")
         self.queue_send.put(
@@ -77,9 +93,9 @@ class Chat(View):
                 author=Settings.get_public_key(),
                 recieve_id=self.current_chat,
                 signature="",
-            )
+            ),
         )
 
-    def on_receiving(self, message: ReceivedPrivateMessage):
+    def on_receiving(self: Self, message: ReceivedPrivateMessage) -> None:
         add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
-        set_y_scroll("chat_child", get_y_scroll_max("chat_child") + 25)
+        set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)

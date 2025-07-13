@@ -1,3 +1,5 @@
+from base64 import b85encode
+
 from oqs import Signature
 
 
@@ -6,9 +8,9 @@ def verify(message: bytes, signature: bytes, public_key: bytes) -> bool:
         return verifier.verify(message, signature, public_key)
 
 
-def sign(message: bytes, private_key: bytes) -> bytes:
+def sign(message: bytes, private_key: bytes) -> str:
     with Signature("ML-DSA-87", private_key) as signer:
-        return signer.sign(message)
+        return b85encode(signer.sign(message)).decode()
 
 
 def generate_keypair() -> tuple[bytes, bytes]:

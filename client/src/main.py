@@ -7,7 +7,7 @@ def main() -> None:
     websocket.start()
     queue_send, queue_receive = websocket.get_queues()
 
-    Messenger(1280, 720, queue_send, queue_receive).run()
+    Messenger(1280, 720, queue_send, queue_receive, websocket.stop).run()
 
 
 if __name__ == "__main__":

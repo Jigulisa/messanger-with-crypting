@@ -17,4 +17,3 @@ class ReceivedPrivateMessage(BaseModel):
     author: str
     recieve_id: str
     signature: str
-    spam: bool

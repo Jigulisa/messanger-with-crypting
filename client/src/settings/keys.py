@@ -25,10 +25,8 @@ class KeysMixin:
         public_key = Settings.get_value("public_key")
 
         if public_key is not None:
-            return b85encode(public_key).decode()
+            return public_key
 
         private_key, public_key = generate_keypair()
-        public_key_str = b85encode(public_key).decode()
         Settings.set_value("private_key", b85encode(private_key).decode())
-        Settings.set_value("public_key", public_key_str)
-        return public_key_str
+        return Settings.set_value("public_key", b85encode(public_key).decode())

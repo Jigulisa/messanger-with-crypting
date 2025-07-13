@@ -15,9 +15,8 @@ from litestar.middleware.authentication import (
     AuthenticationResult,
 )
 from litestar.stores.memory import MemoryStore
-from oqs import Signature
-
 from message_callback import MessageCallback
+from oqs import Signature
 
 
 class AuthenticationMiddleware(AbstractAuthenticationMiddleware):

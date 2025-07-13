@@ -1,11 +1,11 @@
 from base64 import b85decode
-
-from pydantic import ValidationError
 from typing import Self
-from litestar import WebSocket
-from oqs import Signature
 
+from litestar import WebSocket
 from message_struct import PrivateMessage
+from oqs import Signature
+from pydantic import ValidationError
+
 
 class MessageCallback:
     def __init__(self: Self, socket: WebSocket) -> None:

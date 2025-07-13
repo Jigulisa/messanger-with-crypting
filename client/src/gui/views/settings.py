@@ -98,8 +98,6 @@ class Settings(View):
         color = get_value("for_panels_color")
         set_value("selected_panels_color", f"selected {color}")
 
-    def on_form(self: Self) -> None:
-        pass
+    def on_form(self: Self) -> None: ...
 
-    def cancel_callback(self: Self) -> None:
-        pass
+    def cancel_callback(self: Self) -> None: ...

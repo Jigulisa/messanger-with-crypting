@@ -29,5 +29,5 @@ class MessageCallback:
         message = self.validate(data)
         if message is None:
             return
-        if self.socket.auth in {message.recieve_id, message.author}:
+        if self.socket.auth in {message.receive_id, message.author}:
             await self.socket.send_data(message.model_dump_json())

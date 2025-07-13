@@ -57,7 +57,7 @@ class Chat(View):
 
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
-            chats = ("andy", "class chagt", "dad", "barotrauma")
+            chats = ("andy", "class chat", "dad", "barotrauma")
             for chat in chats:
                 add_button(
                     label=chat[:6],

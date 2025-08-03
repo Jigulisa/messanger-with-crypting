@@ -29,10 +29,12 @@ class View(ResizeMixin):
         self.show_view(ViewName.CHAT)
 
     def show_view(self, view_name: ViewName) -> None:
-        for view in ViewName:
-            hide_item(view.value.name)
         if view_name == ViewName.CHAT:
             view_name.value.update_chat_list()
+
+        for view in ViewName:
+            hide_item(view.value.name)
+
         show_item(view_name.value.name)
 
     def create_views(self) -> None:

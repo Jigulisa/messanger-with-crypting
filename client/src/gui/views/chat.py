@@ -57,8 +57,8 @@ class Chat(View):
 
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
-            chats = Settings.get_chats() 
-            for chat in chats:
+            self.chats = Settings.get_chats()
+            for chat in self.chats:
                 add_button(
                     label=chat[:6],
                     tag=chat,
@@ -99,15 +99,14 @@ class Chat(View):
     def on_receiving(self: Self, message: ReceivedPrivateMessage) -> None:
         add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
-    
-    def update_chat_list(self):
-        delete_item("chats_list")
-        with child_window(label="Chats", tag="chats_list", parent="view"):
-            chats = Settings.get_chats() 
-            for chat in chats:
-                add_button(
-                    label=chat[:6],
-                    tag=chat,
-                    callback=lambda *, sender=chat: self.callback(sender)
-                )
-        
+
+    def update_chat_list(self) -> None:
+        chats = Settings.get_chats()
+        for chat in chats.difference(self.chats):
+            add_button(
+                label=chat[:6],
+                tag=chat,
+                callback=lambda *, sender=chat: self.callback(sender),
+                parent="chats_list",
+            )
+        self.chats = chats

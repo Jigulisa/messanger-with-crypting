@@ -41,6 +41,7 @@ class HelpPage(View):
     6. Приватный ключ шифруется и сохраняется в файлике на компьютере, а публичный выводится пользователю на экран
     7. Запускается Сценарий 3 - Первичная персонализация
         """, wrap=500)
+        add_text("Never delete the keys, or you will lose the access to your account!", color=(245, 25, 25))
         self.header_logging_in = add_text("Logging In")
         self.logging_in = add_text("""
     1. Пользователь загружает файл, который содержит приватный ключ

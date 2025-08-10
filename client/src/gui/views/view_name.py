@@ -4,6 +4,7 @@ from gui.views.chat import Chat
 from gui.views.search import Search
 from gui.views.settings import Settings
 from gui.views.storage import Storage
+from gui.views.help_page import HelpPage
 
 
 class ViewName(Enum):
@@ -11,3 +12,4 @@ class ViewName(Enum):
     SETTINGS = Settings()
     STORAGE = Storage()
     SEARCH = Search()
+    HELP = HelpPage()

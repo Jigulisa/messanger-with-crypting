@@ -4,6 +4,7 @@ from dearpygui.dearpygui import (
     add_button,
     add_input_text,
     get_value,
+    add_text
 )
 
 from gui.views.core import View
@@ -21,6 +22,7 @@ class Search(View):
             label="search!",
             callback=self.on_search_buttoning,
         )
+        self.recommend_people_text = add_text("people we recommend to u")
 
     def on_search_buttoning(self) -> None:
         Settings.add_chat(get_value(self.user_name_input))

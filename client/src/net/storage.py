@@ -1,30 +1,36 @@
 from http import HTTPStatus
 
-import requests
+from requests import RequestException, get, post
 
 from settings.server import ServerMixin
 
 
 def get_file_names() -> list[str] | None:
-    response = requests.get(
-        ServerMixin.get_server_storage_url("get_file_names/"),
-        timeout=10,
-    )
+    try:
+        response = get(
+            ServerMixin.get_server_storage_url("get_file_names/"),
+            timeout=10,
+        )
+    except RequestException:
+        return None
 
     if response.status_code == HTTPStatus.OK:
         return response.json()
+
     return None
 
 
 def download_file(name: str) -> bytes | None:
-    param = {
-        "name": name,
-    }
-    response = requests.get(
-        ServerMixin.get_server_storage_url("download_file/"),
-        params=param,
-        timeout=10,
-    )
+    param = {"name": name}
+
+    try:
+        response = get(
+            ServerMixin.get_server_storage_url("download_file/"),
+            params=param,
+            timeout=10,
+        )
+    except RequestException:
+        return None
 
     if response.status_code == HTTPStatus.OK:
         return response.content
@@ -33,11 +39,17 @@ def download_file(name: str) -> bytes | None:
 
 def rename(old: str, new: str) -> str:
     param = {"old_name": old, "new_name": new}
-    response = requests.post(
-        ServerMixin.get_server_storage_url("rename_file/"),
-        data=param,
-        timeout=10,
-    )
+
+    try:
+        response = post(
+            ServerMixin.get_server_storage_url("rename_file/"),
+            data=param,
+            timeout=10,
+        )
+    except RequestException:
+        return "Error. Try Again."
+
     if response.status_code == HTTPStatus.OK:
         return "Done."
+
     return "Error. Try Again."

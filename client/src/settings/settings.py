@@ -1,4 +1,4 @@
-from settings.chats_list import ChatsMixin
+from settings.chats import ChatsMixin
 from settings.keys import KeysMixin
 
 

@@ -9,11 +9,12 @@ authors = [
 requires-python = ">=3.13, <3.14"
 dependencies = [
     "dearpygui",
+    "hf-xet",
     "liboqs-python",
     "msgspec[toml]",
     "pydantic",
-    "torch>=2.8.0",
-    "transformers>=4.55.0",
+    "torch",
+    "transformers",
     "websockets",
 ]
 
@@ -27,6 +28,5 @@ dev = [
 
 [tool.ruff]
 src = ["./src/"]
-extend-exclude = ["*.ipynb"]
 lint.select = ["ALL"]
 lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]

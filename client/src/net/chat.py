@@ -15,6 +15,7 @@ from websockets import ClientConnection, ConnectionClosed, connect
 from net.message_struct import PrivateMessage, PrivateMessage
 from secure.signature import sign, verify
 from settings.settings import Settings
+from models.is_spam import predict_spam
 
 
 class WebSocketClient(Thread):
@@ -100,6 +101,8 @@ class WebSocketClient(Thread):
                 b85decode(verified_message.author),
             )
             if is_valid:
+                is_spam = bool(predict_spam(verified_message))
+                verified_message.is_spam = is_spam
                 self.queue_receive_messages.put(verified_message)
 
     def stop(self: Self) -> None:

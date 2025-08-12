@@ -12,6 +12,8 @@ dependencies = [
     "liboqs-python",
     "msgspec[toml]",
     "pydantic",
+    "torch>=2.8.0",
+    "transformers>=4.55.0",
     "websockets",
 ]
 

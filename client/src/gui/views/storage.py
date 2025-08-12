@@ -11,7 +11,7 @@ from dearpygui.dearpygui import (
     mvFontRangeHint_Default,
     window)
 
-from os.path import abspath
+from pathlib import Path
 from gui.views.core import View
 from net.storage import get_file_names
 

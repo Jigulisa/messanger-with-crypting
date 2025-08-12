@@ -12,7 +12,7 @@ from typing import Any, Self, override
 from pydantic import ValidationError
 from websockets import ClientConnection, ConnectionClosed, connect
 
-from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from net.message_struct import PrivateMessage, PrivateMessage
 from secure.signature import sign, verify
 from settings.settings import Settings
 
@@ -21,14 +21,14 @@ class WebSocketClient(Thread):
     @override
     def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.queue_send_messages: Queue[SentPrivateMessage] = Queue()
-        self.queue_receive_messages: Queue[ReceivedPrivateMessage] = Queue()
+        self.queue_send_messages: Queue[PrivateMessage] = Queue()
+        self.queue_receive_messages: Queue[PrivateMessage] = Queue()
         self.running = threading.Event()
         self.stop_event = asyncio.Event()
 
     def get_queues(
         self: Self,
-    ) -> tuple[Queue[SentPrivateMessage], Queue[ReceivedPrivateMessage]]:
+    ) -> tuple[Queue[PrivateMessage], Queue[PrivateMessage]]:
         return self.queue_send_messages, self.queue_receive_messages
 
     @override
@@ -88,7 +88,7 @@ class WebSocketClient(Thread):
                 continue
 
             try:
-                verified_message = ReceivedPrivateMessage.model_validate_json(message)
+                verified_message = PrivateMessage.model_validate_json(message)
             except ValidationError:
                 continue
 

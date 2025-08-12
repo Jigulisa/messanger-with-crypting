@@ -19,7 +19,7 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
-from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from net.message_struct import PrivateMessage, PrivateMessage
 from settings import Settings
 
 
@@ -87,7 +87,7 @@ class Chat(View):
         inp = get_value("input")
         set_value("input", "")
         self.queue_send.put(
-            SentPrivateMessage(
+            PrivateMessage(
                 message=inp,
                 sent_time=datetime.now(UTC),
                 author=Settings.get_public_key(),
@@ -96,7 +96,7 @@ class Chat(View):
             ),
         )
 
-    def on_receiving(self: Self, message: ReceivedPrivateMessage) -> None:
+    def on_receiving(self: Self, message: PrivateMessage) -> None:
         add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
 

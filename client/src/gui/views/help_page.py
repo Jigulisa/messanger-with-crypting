@@ -19,7 +19,7 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
-from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from net.message_struct import PrivateMessage, PrivateMessage
 from settings import Settings
 
 

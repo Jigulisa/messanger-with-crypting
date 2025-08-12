@@ -1,0 +1,7 @@
+__pycache__/
+.ruff_cache/
+.cache/
+.venv/
+
+*.lock
+settings.toml

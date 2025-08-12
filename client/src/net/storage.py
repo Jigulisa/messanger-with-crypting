@@ -1,18 +1,43 @@
-import asyncio
-import threading
-from asyncio import gather, run, sleep
-from base64 import b85decode, b85encode
-from contextlib import suppress
-from datetime import UTC, datetime
-from os import urandom
-from queue import Empty, Queue
-from threading import Thread
-from typing import Any, Self, override
+from http import HTTPStatus
 
-from pydantic import ValidationError
+import requests
 
-from secure.signature import sign, verify
-from settings.settings import Settings
+from settings.server import ServerMixin
 
-def get_file_names() -> list:
-    return ["1wvefeeqfefweeeee.png", "2.mp3", "3.mov"]
+
+def get_file_names() -> list[str] | None:
+    response = requests.get(
+        ServerMixin.get_server_storage_url("get_file_names/"),
+        timeout=10,
+    )
+
+    if response.status_code == HTTPStatus.OK:
+        return response.json()
+    return None
+
+
+def download_file(name: str) -> bytes | None:
+    param = {
+        "name": name,
+    }
+    response = requests.get(
+        ServerMixin.get_server_storage_url("download_file/"),
+        params=param,
+        timeout=10,
+    )
+
+    if response.status_code == HTTPStatus.OK:
+        return response.content
+    return None
+
+
+def rename(old: str, new: str) -> str:
+    param = {"old_name": old, "new_name": new}
+    response = requests.post(
+        ServerMixin.get_server_storage_url("rename_file/"),
+        data=param,
+        timeout=10,
+    )
+    if response.status_code == HTTPStatus.OK:
+        return "Done."
+    return "Error. Try Again."

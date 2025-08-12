@@ -1,11 +1,6 @@
 from typing import Self
 
-from dearpygui.dearpygui import (
-    add_button,
-    add_input_text,
-    get_value,
-    add_text
-)
+from dearpygui.dearpygui import add_button, add_input_text, add_text, get_value
 
 from gui.views.core import View
 from settings import Settings

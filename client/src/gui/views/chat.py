@@ -16,10 +16,11 @@ from dearpygui.dearpygui import (
     set_item_width,
     set_value,
     set_y_scroll,
+    window,
 )
 
 from gui.views.core import View
-from net.message_struct import PrivateMessage, PrivateMessage
+from net.message_struct import PrivateMessage
 from settings import Settings
 
 
@@ -97,8 +98,18 @@ class Chat(View):
         )
 
     def on_receiving(self: Self, message: PrivateMessage) -> None:
-        add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
+        if not message.is_spam:
+            add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
+        else:
+            add_button(
+                label="SPAM",
+                callback=lambda data=message.message: self.on_spam(data),
+            )
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
+
+    def on_spam(self, text):
+        with window(label="SPAM", width=350, height=450, no_resize=True):
+            add_text(text, wrap=430)
 
     def update_chat_list(self) -> None:
         chats = Settings.get_chats()

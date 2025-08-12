@@ -3,11 +3,12 @@ from typing import Self
 
 from dearpygui.dearpygui import (
     add_button,
+    add_checkbox,
     add_color_picker,
     add_file_extension,
-    add_radio_button,
-    add_input_text,
     add_input_int,
+    add_input_text,
+    add_radio_button,
     add_text,
     file_dialog,
     get_value,
@@ -16,7 +17,6 @@ from dearpygui.dearpygui import (
     set_value,
     show_item,
     window,
-    add_checkbox
 )
 
 from gui.views.core import View
@@ -108,8 +108,7 @@ class Settings(View):
             add_text("ФИО")
             add_input_text()
             add_text("Gender")
-            add_radio_button(items=["male", "female", "ламинат"],
-                             horizontal=True)
+            add_radio_button(items=["male", "female", "ламинат"], horizontal=True)
             add_text("Age")
             add_input_int()
             add_text("Hobbies")
@@ -131,9 +130,8 @@ class Settings(View):
             add_checkbox(label="frontend")
             add_checkbox(label="doing music")
             add_checkbox(label="reading")
-            
+
             add_button(label="Save!", callback=self.on_form_saving)
-            
 
     def cancel_callback(self: Self) -> None: ...
 

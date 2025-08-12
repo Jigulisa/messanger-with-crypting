@@ -12,10 +12,10 @@ from typing import Any, Self, override
 from pydantic import ValidationError
 from websockets import ClientConnection, ConnectionClosed, connect
 
-from net.message_struct import PrivateMessage, PrivateMessage
+from models.is_spam import predict_spam
+from net.message_struct import PrivateMessage
 from secure.signature import sign, verify
 from settings.settings import Settings
-from models.is_spam import predict_spam
 
 
 class WebSocketClient(Thread):

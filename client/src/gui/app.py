@@ -3,12 +3,18 @@ from contextlib import suppress
 from queue import Empty, Queue
 
 from dearpygui.dearpygui import (
+    add_font_range_hint,
+    bind_font,
     create_context,
     create_viewport,
     destroy_context,
+    font,
+    font_registry,
     get_viewport_client_height,
     get_viewport_client_width,
     is_dearpygui_running,
+    mvFontRangeHint_Cyrillic,
+    mvFontRangeHint_Default,
     render_dearpygui_frame,
     set_exit_callback,
     set_viewport_resize_callback,
@@ -19,6 +25,7 @@ from dearpygui.dearpygui import (
 from gui.menu import Menu
 from gui.view import View
 from gui.views.view_name import ViewName
+from settings.storage import Storage
 
 
 class Messenger:
@@ -31,6 +38,15 @@ class Messenger:
         exit_callback: Callable[[], None],
     ) -> None:
         create_context()
+
+        with (
+            font_registry(),
+            font(str(Storage.base_dir / "fonts" / "font.otf"), 20) as default_font,
+        ):
+            add_font_range_hint(mvFontRangeHint_Default)
+            add_font_range_hint(mvFontRangeHint_Cyrillic)
+            bind_font(default_font)
+
         create_viewport(
             title="Cryptogramm",
             width=width,

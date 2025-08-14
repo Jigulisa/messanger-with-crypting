@@ -50,8 +50,18 @@ class Storage(View):
                 height=30,
                 callback=lambda data=file_name: self.on_newnaming(data),
             )
-            add_button(label="properties", width=285, height=30)
-            add_button(label="delete file", width=285, height=30)
+            add_button(
+                label="properties",
+                width=285,
+                height=30,
+                callback=lambda data=file_name: self.on_propertying(data),
+            )
+            add_button(
+                label="delete file",
+                width=285,
+                height=30,
+                callback=lambda data=file_name: self.on_deleting(data),
+            )
             add_button(
                 label="close",
                 callback=lambda: delete_item(f"second_window_{name}"),
@@ -65,26 +75,9 @@ class Storage(View):
             path = pathlib.Path().parent.parent.parent.parent.as_posix()
             with open(path + name, "wb") as f:
                 f.write(data)
-            with window(
-                tag="Notification",
-                width=300,
-                height=150,
-                no_resize=True,
-            ):
-                add_text(f"File {name} was downloaded!", wrap=290)
-                add_button(
-                    label="Ok",
-                    callback=lambda data="Notification": delete_item(data),
-                )
+            self.make_notification(f"File {name} was downloaded!")
         else:
-            with window(
-                tag="Notification",
-                width=300,
-                height=150,
-                no_resize=True,
-            ):
-                add_text("An exception has caused. File was not downloaded.", wrap=290)
-                add_button(label="Ok")
+            self.make_notification("An exception has caused. File was not downloaded.")
 
     def on_newnaming(self, file_name: str) -> None:
         with window(width=200, height=200, no_resize=True):
@@ -96,4 +89,23 @@ class Storage(View):
 
     def button_callback(self, old: str) -> None:
         new = get_value("new_name")
-        rename(old, new)
+        self.make_notification(rename(old, new))
+
+    def on_propertying(self, file_name: str) -> None:
+        pass
+
+    def make_notification(self, message: str) -> None:
+        with window(
+            tag="Notification",
+            width=300,
+            height=150,
+            no_resize=True,
+        ):
+            add_text(message, wrap=290)
+            add_button(
+                label="Ok",
+                callback=lambda data="Notification": delete_item(data),
+            )
+
+    def on_deleting(self, file_name: str) -> None:
+        pass

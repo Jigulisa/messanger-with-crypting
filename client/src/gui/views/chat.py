@@ -107,7 +107,7 @@ class Chat(View):
             )
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
 
-    def on_spam(self, text):
+    def on_spam(self, text: str) -> None:
         with window(label="SPAM", width=350, height=450, no_resize=True):
             add_text(text, wrap=430)
 

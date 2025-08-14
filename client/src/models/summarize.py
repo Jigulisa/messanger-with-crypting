@@ -1,11 +1,24 @@
-from openai import OpenAI
+import torch
+from transformers import GPT2Tokenizer, T5ForConditionalGeneration
 
-client = OpenAI()
+tokenizer = GPT2Tokenizer.from_pretrained(
+    "RussianNLP/FRED-T5-Summarizer",
+    eos_token="</s>",
+)
+model = T5ForConditionalGeneration.from_pretrained("RussianNLP/FRED-T5-Summarizer")
 
 
-def make_request(messages: list):
-    response = client.responses.create(
-        model="gpt-5",
-        input=f"I have some messages. I want you to summarize the discussion. Messages: '{messages}'",
+def summarizer(data: str) -> str:
+    input_text = f"<LM> Сократи текст.\n {data}"
+    input_ids = torch.tensor([tokenizer.encode(input_text)])
+    outputs = model.generate(
+        input_ids,
+        eos_token_id=tokenizer.eos_token_id,
+        num_beams=5,
+        min_new_tokens=17,
+        max_new_tokens=200,
+        do_sample=True,
+        no_repeat_ngram_size=4,
+        top_p=0.9,
     )
-    return response
+    return tokenizer.decode(outputs[0][1:])

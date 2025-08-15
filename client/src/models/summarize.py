@@ -3,7 +3,7 @@ from transformers import GPT2Tokenizer, T5ForConditionalGeneration
 
 tokenizer = GPT2Tokenizer.from_pretrained(
     "RussianNLP/FRED-T5-Summarizer",
-    eos_token="</s>",
+    eos_token="</s>",  # noqa: S106
 )
 model = T5ForConditionalGeneration.from_pretrained("RussianNLP/FRED-T5-Summarizer")
 

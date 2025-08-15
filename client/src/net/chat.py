@@ -101,7 +101,7 @@ class WebSocketClient(Thread):
                 b85decode(verified_message.author),
             )
             if is_valid:
-                is_spam = bool(predict_spam(verified_message))
+                is_spam = bool(predict_spam(verified_message.message))
                 verified_message.is_spam = is_spam
                 self.queue_receive_messages.put(verified_message)
 

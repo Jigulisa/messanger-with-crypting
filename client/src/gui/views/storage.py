@@ -27,7 +27,6 @@ class Storage(View):
         return "storage"
 
     def create(self) -> None:
-
         self.file_names = get_file_names()
         if self.file_names:
             for fn in self.file_names:

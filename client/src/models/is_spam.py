@@ -26,5 +26,5 @@
 #     return pred_class
 
 
-def predict_spam(text):
+def predict_spam(text: str) -> bool:
     return False

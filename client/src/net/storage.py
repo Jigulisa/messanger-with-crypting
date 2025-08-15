@@ -54,6 +54,7 @@ def rename(old: str, new: str) -> str:
 
     return "Error. Try Again."
 
+
 def get_file_properties(name: str) -> str:
     param = {"name": name}
 
@@ -70,6 +71,7 @@ def get_file_properties(name: str) -> str:
         return response.json()
 
     return "Error. Try Again."
+
 
 def delete_file(name: str) -> str:
     param = {"name": name}

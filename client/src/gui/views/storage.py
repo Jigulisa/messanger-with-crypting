@@ -12,7 +12,13 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
-from net.storage import download_file, rename
+from net.storage import (
+    delete_file,
+    download_file,
+    get_file_names,
+    get_file_properties,
+    rename,
+)
 
 
 class Storage(View):
@@ -21,9 +27,11 @@ class Storage(View):
         return "storage"
 
     def create(self) -> None:
-        self.file_names = ["3", "4"]
-        for fn in self.file_names:
-            add_button(label=fn, width=100, height=100, callback=self.on_tapping)
+
+        self.file_names = get_file_names()
+        if self.file_names:
+            for fn in self.file_names:
+                add_button(label=fn, width=100, height=100, callback=self.on_tapping)
 
     def on_tapping(self, name: str) -> None:
         if does_item_exist(f"second_window_{name}"):
@@ -92,7 +100,16 @@ class Storage(View):
         self.make_notification(rename(old, new))
 
     def on_propertying(self, file_name: str) -> None:
-        pass
+        props = get_file_properties(file_name)
+        with window(
+            tag="File properties",
+            label="File properties",
+            width=300,
+            height=450,
+            no_resize=True,
+        ):
+            for i, j in props:
+                add_text(f"{i}: {j}", wrap=290)
 
     def make_notification(self, message: str) -> None:
         with window(
@@ -108,4 +125,5 @@ class Storage(View):
             )
 
     def on_deleting(self, file_name: str) -> None:
-        pass
+        result = delete_file(file_name)
+        self.make_notification(result)

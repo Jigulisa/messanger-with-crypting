@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13, <3.14"
 dependencies = [
+    "aiosqlite",
     "liboqs-python",
     "litestar[pydantic,redis,sqlalchemy]",
     "uvicorn[standard]",
@@ -18,7 +19,6 @@ liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git"
 
 [dependency-groups]
 dev = [
-    "aiosqlite",
     "ruff",
 ]
 

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from requests import RequestException, get, post
+from requests import RequestException, delete, get, post
 
 from settings.server import ServerMixin
 
@@ -8,7 +8,7 @@ from settings.server import ServerMixin
 def get_file_names() -> list[str] | None:
     try:
         response = get(
-            ServerMixin.get_server_storage_url("get_file_names/"),
+            ServerMixin.get_server_storage_url("names"),
             timeout=10,
         )
     except RequestException:
@@ -25,7 +25,7 @@ def download_file(name: str) -> bytes | None:
 
     try:
         response = get(
-            ServerMixin.get_server_storage_url("download_file/"),
+            ServerMixin.get_server_storage_url("download"),
             params=param,
             timeout=10,
         )
@@ -38,11 +38,11 @@ def download_file(name: str) -> bytes | None:
 
 
 def rename(old: str, new: str) -> str:
-    param = {"old_name": old, "new_name": new}
+    param = {"old": old, "new": new}
 
     try:
         response = post(
-            ServerMixin.get_server_storage_url("rename_file/"),
+            ServerMixin.get_server_storage_url("rename"),
             data=param,
             timeout=10,
         )
@@ -60,7 +60,7 @@ def get_file_properties(name: str) -> str:
 
     try:
         response = get(
-            ServerMixin.get_server_storage_url("get_file_properties/"),
+            ServerMixin.get_server_storage_url("properties/"),
             params=param,
             timeout=10,
         )
@@ -76,8 +76,8 @@ def get_file_properties(name: str) -> str:
 def delete_file(name: str) -> str:
     param = {"name": name}
     try:
-        response = post(
-            ServerMixin.get_server_storage_url("delete_file/"),
+        response = delete(
+            ServerMixin.get_server_storage_url("delete"),
             data=param,
             timeout=10,
         )

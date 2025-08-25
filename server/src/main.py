@@ -3,6 +3,7 @@ from typing import Self
 from litestar import Litestar
 from litestar.channels import ChannelsPlugin
 from litestar.channels.backends.memory import MemoryChannelsBackend
+from litestar.middleware import DefineMiddleware
 from litestar.plugins.sqlalchemy import (
     AsyncSessionConfig,
     SQLAlchemyAsyncConfig,
@@ -12,7 +13,7 @@ from litestar.plugins.sqlalchemy import (
 
 from files.router import router as files_router
 from messages.router import router as messages_router
-from users.middleware import middleware as users_middleware
+from users.middleware import AuthenticationMiddleware
 
 
 class OnSturtup:
@@ -34,7 +35,13 @@ app = Litestar(
         ChannelsPlugin(backend=MemoryChannelsBackend(), channels=["messages_channel"]),
         SQLAlchemyInitPlugin(config=OnSturtup.sqlalchemy_config),
     ],
-    middleware=users_middleware,
+    middleware=[
+        DefineMiddleware(
+            AuthenticationMiddleware,
+            sqlalchemy_config=OnSturtup.sqlalchemy_config,
+            exclude=["/schema"],
+        ),
+    ],
 )
 
 

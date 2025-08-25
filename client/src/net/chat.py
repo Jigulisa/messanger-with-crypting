@@ -1,10 +1,8 @@
 import asyncio
 import threading
 from asyncio import gather, run, sleep
-from base64 import b85decode, b85encode
+from base64 import b85decode
 from contextlib import suppress
-from datetime import UTC, datetime
-from os import urandom
 from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
@@ -14,6 +12,7 @@ from websockets import ClientConnection, ConnectionClosed, connect
 
 from models.is_spam import predict_spam
 from net.message_struct import PrivateMessage
+from net.utils import get_auth_headers
 from secure.signature import sign, verify
 from settings.settings import Settings
 
@@ -36,21 +35,12 @@ class WebSocketClient(Thread):
     def run(self: Self) -> None:
         run(self.main())
 
-    def get_auth_headers(self: Self) -> dict[str, str]:
-        nonce = urandom(2048)
-        return {
-            "X-Timestamp": datetime.now(UTC).isoformat(),
-            "X-Public-Key": Settings.get_public_key(),
-            "X-Nonce": b85encode(nonce).decode(),
-            "X-Signature": sign(nonce, Settings.get_private_key()),
-        }
-
     async def main(self: Self) -> None:
         while not self.running.is_set():
             with suppress(OSError):
                 async with connect(
-                    "ws://127.0.0.1:8000/messages",
-                    additional_headers=self.get_auth_headers(),
+                    Settings.get_server_messages_url(),
+                    additional_headers=get_auth_headers(),
                 ) as websocket:
                     await gather(
                         self.send_messages(websocket),

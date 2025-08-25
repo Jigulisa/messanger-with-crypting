@@ -45,4 +45,3 @@ class ServerMixin:
     @staticmethod
     def get_auth_headers() -> dict[str, str]:
         return {}
-

@@ -1,3 +1,8 @@
+from os import environ
+from pathlib import Path
+
+environ["OQS_INSTALL_PATH"] = str(Path(__file__).resolve().parent.parent / "libs" / "oqs")
+
 from gui.app import Messenger
 from net.chat import WebSocketClient
 

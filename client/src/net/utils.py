@@ -1,8 +1,10 @@
-from settings import Settings
-from os import urandom
-from datetime import datetime, UTC
 from base64 import b85encode
+from datetime import UTC, datetime
+from os import urandom
+
 from secure.signature import sign
+from settings import Settings
+
 
 def get_auth_headers() -> dict[str, str]:
     nonce = urandom(2048)

@@ -28,6 +28,7 @@ class Settings(View):
         return "settings"
 
     def create(self: Self) -> None:
+        add_text("Settings")
         self.create_appearance_set()
         self.create_roles_place()
         self.fill_in_form()

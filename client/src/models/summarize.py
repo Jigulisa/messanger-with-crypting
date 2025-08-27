@@ -1,25 +1,23 @@
 import torch
-from transformers import GPT2Tokenizer, T5ForConditionalGeneration
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
-from settings import Settings
+from net.ai import get_summarization_model
 from settings.storage import Storage
-
-path = Storage.base_dir / ".cache/"
-model_name = "RussianNLP/FRED-T5-Summarizer"
-if not (path / model_name).exists():
-    ...
-tokenizer = GPT2Tokenizer.from_pretrained(
-    "RussianNLP/FRED-T5-Summarizer",
-    eos_token="</s>",  # noqa: S106
-    token=Settings.get_hf_token(),
-)
-model = T5ForConditionalGeneration.from_pretrained(
-    "RussianNLP/FRED-T5-Summarizer",
-    token=Settings.get_hf_token(),
-)
 
 
 def summarizer(data: str) -> str:
+    path = Storage.base_dir / ".cache/"
+    model_name = "Paleontolog/bart_rus_summarizer"
+    if not (path / model_name).exists():
+        get_summarization_model()
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_name,
+        cache_dir=path,
+    )
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        model_name,
+        cache_dir=path,
+    )
     input_text = f"<LM> Сократи текст.\n {data}"
     input_ids = torch.tensor([tokenizer.encode(input_text)])
     outputs = model.generate(

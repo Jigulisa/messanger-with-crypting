@@ -9,9 +9,9 @@ from dearpygui.dearpygui import (
     add_text,
     child_window,
     delete_item,
+    get_item_width,
     get_value,
     get_y_scroll_max,
-    group,
     set_item_height,
     set_item_pos,
     set_item_width,
@@ -59,6 +59,7 @@ class Chat(View):
 
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
+            add_button(label="new chat")
             self.chats = Settings.get_chats()
             for chat in self.chats:
                 add_button(
@@ -69,7 +70,10 @@ class Chat(View):
 
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
-            add_text("no1", tag="chat_name")
+            group_id = add_group(horizontal=True)
+
+            add_text("no1", tag="chat_name", parent=group_id)
+            add_button(label="+", parent=group_id)
 
     def create_chat_place(self: Self) -> None:
         with child_window(label="Messages", tag="chat_place", border=False):
@@ -77,9 +81,16 @@ class Chat(View):
 
     def create_text_zone(self: Self) -> None:
         with child_window(label="text", tag="text_place"):
-            with group(horizontal=True):
-                add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
-                add_button(label="send", callback=lambda: self.on_sending())
+            group_id = add_group(horizontal=True)
+            add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+                           tag="input",
+                           width=get_item_width("text_place") - 70,
+                           parent=group_id,
+                           )
+            add_button(label="send",
+                       callback=lambda: self.on_sending(),
+                       parent=group_id,
+                       )
 
     def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)
@@ -101,7 +112,10 @@ class Chat(View):
 
     def on_receiving(self: Self, message: PrivateMessage) -> None:
         if not message.is_spam:
-            add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
+            add_text(
+                f"{message.author[:6]}: {message.message}",
+                parent="message_group",
+                wrap=get_item_width("chat_place"))
         else:
             add_button(
                 label="SPAM",

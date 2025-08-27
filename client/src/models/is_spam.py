@@ -4,26 +4,23 @@ from transformers import (
     DistilBertTokenizer,
 )
 
-from settings import Settings
+from net.ai import get_spam_tracker_model
 from settings.storage import Storage
-
-path = Storage.base_dir / ".cache/"
-model_name = "AventIQ-AI/distilbert-spam-detection"
-if not (path / model_name).exists():
-    ...
-tokenizer = DistilBertTokenizer.from_pretrained(
-    model_name,
-    cache_dir=path,
-    token=Settings.get_hf_token(),
-)
-model = DistilBertForSequenceClassification.from_pretrained(
-    model_name,
-    cache_dir=path,
-    token=Settings.get_hf_token(),
-)
 
 
 def predict_spam(text: str) -> bool:
+    path = Storage.base_dir / ".cache/"
+    model_name = "AventIQ-AI/distilbert-spam-detection"
+    if not (path / model_name).exists():
+        get_spam_tracker_model()
+    tokenizer = DistilBertTokenizer.from_pretrained(
+    model_name,
+    cache_dir=path,
+    )
+    model = DistilBertForSequenceClassification.from_pretrained(
+        model_name,
+        cache_dir=path,
+    )
     model.eval()
     inputs = tokenizer(
         text,
@@ -32,7 +29,6 @@ def predict_spam(text: str) -> bool:
         truncation=True,
         max_length=512,
     )
-
     outputs = model(**inputs)
     probs = torch.softmax(outputs.logits, dim=-1)
     return bool(torch.argmax(probs).item())

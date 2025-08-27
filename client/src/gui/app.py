@@ -36,10 +36,17 @@ from settings.storage import Storage
 
 
 class SignIn:
-    def __init__(self):
+    def __init__(self) -> None:
         create_context()
-        create_viewport()
-        self.main_window = add_window(label="Cryptogram")
+        create_viewport(width=300, height=200)
+        self.main_window = add_window(label="Cryptogram",
+                                      width=290,
+                                      height=220,
+                                      no_title_bar=True,
+                                      no_resize=True,
+                                      no_move=True,
+                                      pos=[-1, -1],
+                                      )
         with (
             font_registry(),
             font(str(Storage.base_dir / "fonts" / "font.otf"), 20) as default_font,
@@ -48,7 +55,7 @@ class SignIn:
             add_font_range_hint(mvFontRangeHint_Cyrillic)
             bind_font(default_font)
 
-        add_text("Hello again, explorer!", pos=[200, 50], parent=self.main_window)
+        add_text("Hello again, explorer!", parent=self.main_window)
         self.password = add_input_text(
             default_value="your password",
             parent=self.main_window,

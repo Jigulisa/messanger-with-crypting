@@ -3,10 +3,10 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class PrivateMessage(BaseModel):
-    message: str
+class MessageDTO(BaseModel):
+    text: str
     sent_time: datetime
     author: str
-    receive_id: str
+    chat_id: str
     signature: str
     is_spam: bool = Field(exclude=True, default=False)

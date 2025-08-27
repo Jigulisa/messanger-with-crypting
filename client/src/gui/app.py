@@ -36,9 +36,10 @@ from settings.storage import Storage
 
 
 class SignIn:
-    def __init__(self):
+    def __init__(self) -> None:
         create_context()
         create_viewport()
+        self.password = None
         self.main_window = add_window(label="Cryptogram")
         with (
             font_registry(),
@@ -49,7 +50,7 @@ class SignIn:
             bind_font(default_font)
 
         add_text("Hello again, explorer!", pos=[200, 50], parent=self.main_window)
-        self.password = add_input_text(
+        self.password_input = add_input_text(
             default_value="your password",
             parent=self.main_window,
         )
@@ -60,7 +61,7 @@ class SignIn:
         destroy_context()
 
     def on_password(self) -> None:
-        self.input_text = get_value(self.password)
+        self.password = get_value(self.password_input)
         stop_dearpygui()
 
 

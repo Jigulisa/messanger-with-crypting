@@ -22,6 +22,6 @@ class Search(View):
 
     def on_search_buttoning(self) -> None:
         name = get_value(self.user_name_input)
-        uuid = create_chat(name)
+        uuid = create_chat()
         if uuid is not None:
             Settings.add_chat(name, uuid)

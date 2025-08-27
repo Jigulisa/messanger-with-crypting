@@ -4,7 +4,6 @@ from transformers import (
     DistilBertTokenizer,
 )
 
-from settings import Settings
 from settings.storage import Storage
 
 path = Storage.base_dir / ".cache/"
@@ -14,12 +13,10 @@ if not (path / model_name).exists():
 tokenizer = DistilBertTokenizer.from_pretrained(
     model_name,
     cache_dir=path,
-    token=Settings.get_hf_token(),
 )
 model = DistilBertForSequenceClassification.from_pretrained(
     model_name,
     cache_dir=path,
-    token=Settings.get_hf_token(),
 )
 
 

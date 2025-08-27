@@ -10,7 +10,7 @@ from net.chat import WebSocketClient
 
 
 def main() -> None:
-    password = SignIn().input_text
+    password = SignIn().password
 
     websocket = WebSocketClient()
     websocket.start()

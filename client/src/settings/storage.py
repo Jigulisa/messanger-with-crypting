@@ -6,7 +6,7 @@ from msgspec import DecodeError
 from msgspec.toml import decode, encode
 
 
-class Storage[T: list | str | int | float | bool]:
+class Storage[T: list | dict | str | int | float | bool]:
     base_dir = Path(__file__).resolve().parent.parent.parent
     path = base_dir / "settings.toml"
 

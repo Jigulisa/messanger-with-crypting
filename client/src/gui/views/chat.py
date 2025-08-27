@@ -21,7 +21,7 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
-from net.message_struct import PrivateMessage
+from net.dto import MessageDTO
 from settings import Settings
 
 
@@ -60,11 +60,11 @@ class Chat(View):
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
             self.chats = Settings.get_chats()
-            for chat in self.chats:
+            for name in self.chats:
                 add_button(
-                    label=chat[:6],
-                    tag=chat,
-                    callback=lambda *, sender=chat: self.callback(sender),
+                    label=name,
+                    tag=name,
+                    callback=lambda *, selected_chat=name: self.callback(selected_chat),
                 )
 
     def create_personal_zone(self: Self) -> None:
@@ -83,29 +83,29 @@ class Chat(View):
 
     def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)
-        set_value("chat_name", selected_chat[:6])
+        set_value("chat_name", selected_chat)
         self.current_chat = selected_chat
 
     def on_sending(self: Self) -> None:
         inp = get_value("input")
         set_value("input", "")
         self.queue_send.put(
-            PrivateMessage(
-                message=inp,
+            MessageDTO(
+                text=inp,
                 sent_time=datetime.now(UTC),
                 author=Settings.get_public_key(),
-                receive_id=self.current_chat,
+                chat_id=self.current_chat,
                 signature="",
             ),
         )
 
-    def on_receiving(self: Self, message: PrivateMessage) -> None:
+    def on_receiving(self: Self, message: MessageDTO) -> None:
         if not message.is_spam:
-            add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
+            add_text(f"{message.author[:6]}: {message.text}", parent="message_group")
         else:
             add_button(
                 label="SPAM",
-                callback=lambda data=message.message: self.on_spam(data),
+                callback=lambda data=message.text: self.on_spam(data),
             )
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
 
@@ -115,11 +115,12 @@ class Chat(View):
 
     def update_chat_list(self) -> None:
         chats = Settings.get_chats()
-        for chat in chats.difference(self.chats):
+        delete_item("chats_list", children_only=True)
+        for name in chats:
             add_button(
-                label=chat[:6],
-                tag=chat,
-                callback=lambda *, sender=chat: self.callback(sender),
+                label=name,
+                tag=name,
+                callback=lambda *, selected_chat=name: self.callback(selected_chat),
                 parent="chats_list",
             )
         self.chats = chats

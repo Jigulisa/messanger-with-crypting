@@ -106,8 +106,6 @@ class ChatController(Controller):
         data: CreateChat,
         chat_repository: ChatRepository,
     ) -> UUID:
-        if await chat_repository.exists(owner=request.user, name=data.name):
-            raise ClientException(detail="Chat with this name already exists")
         chat = await chat_repository.add(
             Chat(**data.model_dump(), owner=request.user),
             auto_commit=True,
@@ -149,3 +147,7 @@ class ChatController(Controller):
             )
             for message in await message_repository.list(chat_id=chat_id)
         ]
+
+    @get("/all")
+    async def get_all_chats(self: Self, request: Request, access_repository: AccessRepository) -> list[UUID]:
+        return [access.chat.id for access in await access_repository.list(user=request.user)]

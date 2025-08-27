@@ -105,11 +105,14 @@ class ChatController(Controller):
         request: Request,
         data: CreateChat,
         chat_repository: ChatRepository,
-    ) -> None:
+    ) -> UUID:
         if await chat_repository.exists(owner=request.user, name=data.name):
             raise ClientException(detail="Chat with this name already exists")
-        chat = Chat(**data.model_dump(), owner=request.user)
-        await chat_repository.add(chat, auto_commit=True)
+        chat = await chat_repository.add(
+            Chat(**data.model_dump(), owner=request.user),
+            auto_commit=True,
+        )
+        return chat.id
 
     @post("/grant")
     async def grant_access(
@@ -126,7 +129,7 @@ class ChatController(Controller):
         user = await user_repository.get_one(public_key=data.user)
         await access_repository.add(Access(user=user, chat=chat, role=data.user))
 
-    @get("/{chat_id:int}")
+    @get("/{chat_id:uuid}")
     async def get_chat_messages(
         self: Self,
         request: Request,
@@ -134,8 +137,8 @@ class ChatController(Controller):
         access_repository: AccessRepository,
         message_repository: MessageRepository,
     ) -> list[MessageDTO]:
-        if await access_repository.exists(user=request.user, chat_id=chat_id):
-            raise ClientException(detail="Chat with this name already exists")
+        if not await access_repository.exists(user=request.user, chat_id=chat_id):
+            raise PermissionDeniedException
         return [
             MessageDTO(
                 text=message.text,

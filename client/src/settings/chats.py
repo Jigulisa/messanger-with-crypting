@@ -1,20 +1,22 @@
+from uuid import UUID
+
 from settings.storage import Storage
 
 
 class ChatsMixin:
     @staticmethod
-    def add_chat(new_chat: str) -> str:
+    def add_chat(name: str, uuid: UUID) -> str:
         chats = set(Storage[list].get_value("chats", default=[]))
-        chats.add(new_chat)
+        chats.add({"name": name, "uuid": uuid})
         Storage[list].set_value("chats", list(chats))
-        return new_chat
+        return name
 
     @staticmethod
-    def delete_chat(chat: str) -> str:
+    def delete_chat(name: str) -> str:
         chats = set(Storage[list].get_value("chats", default=[]))
-        chats.remove(chat)
+        chats.remove(name)
         Storage[list].set_value("chats", list(chats))
-        return chat
+        return name
 
     @staticmethod
     def get_chats() -> set[str]:

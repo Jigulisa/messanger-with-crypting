@@ -7,6 +7,7 @@ from http import HTTPStatus
 from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
+from uuid import UUID
 
 from pydantic import ValidationError
 from requests import RequestException, post
@@ -102,7 +103,7 @@ class WebSocketClient(Thread):
         self.stop_event.set()
 
 
-def create_chat(name: str, description: str | None = None) -> bool:
+def create_chat(name: str, description: str | None = None) -> UUID | None:
     data = {
         "name": name,
         "description": description,
@@ -116,6 +117,9 @@ def create_chat(name: str, description: str | None = None) -> bool:
             headers=get_auth_headers(),
         )
     except RequestException:
-        return False
+        return None
 
-    return response.status_code == HTTPStatus.CREATED
+    if response.status_code != HTTPStatus.CREATED:
+        return None
+
+    return UUID(response.text)

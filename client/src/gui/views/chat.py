@@ -17,6 +17,7 @@ from dearpygui.dearpygui import (
     set_value,
     set_y_scroll,
     window,
+    group,
 )
 
 from gui.views.core import View
@@ -76,8 +77,9 @@ class Chat(View):
 
     def create_text_zone(self: Self) -> None:
         with child_window(label="text", tag="text_place"):
-            add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
-            add_button(label="send", callback=lambda: self.on_sending())
+            with group(horizontal=True):
+                add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
+                add_button(label="send", callback=lambda: self.on_sending())
 
     def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)

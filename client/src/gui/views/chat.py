@@ -59,7 +59,6 @@ class Chat(View):
 
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
-            add_button(label="new chat")
             self.chats = Settings.get_chats()
             for name in self.chats:
                 add_button(
@@ -67,6 +66,7 @@ class Chat(View):
                     tag=name,
                     callback=lambda *, selected_chat=name: self.callback(selected_chat),
                 )
+            add_button(label="new chat", parent="chats_list")
 
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
@@ -133,6 +133,7 @@ class Chat(View):
     def update_chat_list(self) -> None:
         chats = Settings.get_chats()
         delete_item("chats_list", children_only=True)
+        add_button(label="new chat", callback=lambda: ..., parent="chats_list")
         for name in chats:
             add_button(
                 label=name,

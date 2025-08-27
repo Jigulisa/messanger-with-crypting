@@ -117,7 +117,7 @@ class Settings(View):
             add_checkbox(label="programming")
             add_checkbox(label="ML")
             add_checkbox(label="algorythms")
-            add_checkbox(label="rock")
+            add_checkbox(label="rock music")
             add_checkbox(label="drawing")
             add_checkbox(label="art")
             add_checkbox(label="manga")
@@ -131,6 +131,7 @@ class Settings(View):
             add_checkbox(label="frontend")
             add_checkbox(label="doing music")
             add_checkbox(label="reading")
+            add_checkbox(label="other")
 
             add_button(label="Save!", callback=self.on_form_saving)
 

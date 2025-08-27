@@ -30,10 +30,12 @@ class MessageCallback:
         socket: WebSocket,
         user_repository: UserRepository,
         message_repository: MessageRepository,
+        access_repository: AccessRepository,
     ) -> None:
         self.socket = socket
         self.user_repository = user_repository
         self.message_repository = message_repository
+        self.access_repository = access_repository
 
     @staticmethod
     def validate(data: bytes) -> MessageDTO | None:
@@ -53,21 +55,21 @@ class MessageCallback:
         message = self.validate(data)
         if message is None:
             return
-        chat_users = await self.chat_repository.get_users()
-        if self.socket.auth in {
-            message.chat_id,
-            message.author,
-        }:  # TODO: chat_id is not user public key
-            author = await self.user_repository.get_one(public_key=message.author)
-            await self.message_repository.add(
-                Message(
-                    sent_time=message.sent_time,
-                    text=message.text,
-                    author=author,
-                    chat_id=message.chat_id,
-                ),
-                auto_commit=True,
-            )
+
+        author = await self.user_repository.get_one(public_key=message.author)
+        await self.message_repository.add(
+            Message(
+                sent_time=message.sent_time,
+                text=message.text,
+                author=author,
+                chat_id=message.chat_id,
+            ),
+            auto_commit=True,
+        )
+
+        chat_users = {access.user.public_key for access in await self.access_repository.list(chat_id=message.chat_id)}
+
+        if self.socket.auth in chat_users:
             await self.socket.send_data(message.model_dump_json())
 
 
@@ -77,11 +79,12 @@ async def connection_lifespan(
     channels: ChannelsPlugin,
     user_repository: UserRepository,
     message_repository: MessageRepository,
+    access_repository: AccessRepository,
 ) -> AsyncGenerator[None]:
     async with (
         channels.start_subscription("messages_channel") as subscriber,
         subscriber.run_in_background(
-            MessageCallback(socket, user_repository, message_repository),
+            MessageCallback(socket, user_repository, message_repository, access_repository),
         ),
     ):
         with suppress(WebSocketDisconnect):

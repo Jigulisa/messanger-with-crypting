@@ -1,5 +1,3 @@
-import pathlib
-
 from dearpygui.dearpygui import (
     add_button,
     add_input_text,
@@ -19,6 +17,7 @@ from net.storage import (
     get_file_properties,
     rename,
 )
+from settings import storage
 
 
 class Storage(View):
@@ -79,9 +78,8 @@ class Storage(View):
     def on_downloading(self, name: str) -> None:
         data = download_file(name)
         if data:
-            path = pathlib.Path().parent.parent.parent.parent.as_posix()
-            with open(path + name, "wb") as f:
-                f.write(data)
+            with (storage.Storage.base_dir / "downloads" / name).open("wb") as file:
+                file.write(data)
             self.make_notification(f"File {name} was downloaded!")
         else:
             self.make_notification("An exception has caused. File was not downloaded.")

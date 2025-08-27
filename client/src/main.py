@@ -1,10 +1,9 @@
 from os import environ
 from pathlib import Path
-from dearpygui.dearpygui import (
-    create_context,
-)
 
-environ["OQS_INSTALL_PATH"] = str(Path(__file__).resolve().parent.parent / "libs" / "oqs")
+environ["OQS_INSTALL_PATH"] = str(
+    Path(__file__).resolve().parent.parent / "libs" / "oqs",
+)
 
 from gui.app import Messenger, SignIn
 from net.chat import WebSocketClient
@@ -12,8 +11,6 @@ from net.chat import WebSocketClient
 
 def main() -> None:
     password = SignIn().input_text
-
-    print(password)
 
     websocket = WebSocketClient()
     websocket.start()

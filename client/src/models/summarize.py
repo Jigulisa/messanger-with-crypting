@@ -1,5 +1,6 @@
 import torch
 from transformers import GPT2Tokenizer, T5ForConditionalGeneration
+
 from settings import Settings
 from settings.storage import Storage
 
@@ -16,6 +17,7 @@ model = T5ForConditionalGeneration.from_pretrained(
     "RussianNLP/FRED-T5-Summarizer",
     token=Settings.get_hf_token(),
 )
+
 
 def summarizer(data: str) -> str:
     input_text = f"<LM> Сократи текст.\n {data}"

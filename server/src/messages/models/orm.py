@@ -16,14 +16,16 @@ class Chat(base.UUIDv7AuditBase):
 
 
 class Message(base.UUIDv7AuditBase):
+    text: Mapped[str]
     sent_time: Mapped[datetime]
-    message: Mapped[str]
 
     author_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
     author: Mapped[User] = relationship()
 
     chat_id: Mapped[UUID] = mapped_column(ForeignKey("chat.id"))
     chat: Mapped[Chat] = relationship()
+
+    signature: Mapped[str]
 
 
 class Access(base.UUIDv7AuditBase):
@@ -34,4 +36,3 @@ class Access(base.UUIDv7AuditBase):
     chat: Mapped[Chat] = relationship()
 
     role: Mapped[str]
-    last_seen: Mapped[datetime]

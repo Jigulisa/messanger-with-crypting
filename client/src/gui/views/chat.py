@@ -11,13 +11,13 @@ from dearpygui.dearpygui import (
     delete_item,
     get_value,
     get_y_scroll_max,
+    group,
     set_item_height,
     set_item_pos,
     set_item_width,
     set_value,
     set_y_scroll,
     window,
-    group,
 )
 
 from gui.views.core import View

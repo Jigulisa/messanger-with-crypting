@@ -36,5 +36,7 @@ def predict_spam(text: str) -> bool:
     outputs = model(**inputs)
     probs = torch.softmax(outputs.logits, dim=-1)
     return bool(torch.argmax(probs).item())
+
+
 def dummy_predict_spam(text: str) -> bool:
     return False

@@ -3,18 +3,20 @@ import threading
 from asyncio import gather, run, sleep
 from base64 import b85decode
 from contextlib import suppress
+from http import HTTPStatus
 from queue import Empty, Queue
 from threading import Thread
 from typing import Any, Self, override
 
 from pydantic import ValidationError
+from requests import RequestException, post
 from websockets import ClientConnection, ConnectionClosed, connect
 
 from models.is_spam import predict_spam
 from net.message_struct import PrivateMessage
 from net.utils import get_auth_headers
 from secure.signature import sign, verify
-from settings.settings import Settings
+from settings import Settings
 
 
 class WebSocketClient(Thread):
@@ -98,3 +100,22 @@ class WebSocketClient(Thread):
     def stop(self: Self) -> None:
         self.running.set()
         self.stop_event.set()
+
+
+def create_chat(name: str, description: str | None = None) -> bool:
+    data = {
+        "name": name,
+        "description": description,
+    }
+
+    try:
+        response = post(
+            Settings.get_server_chat_url("/create"),
+            json=data,
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return False
+
+    return response.status_code == HTTPStatus.CREATED

@@ -1,9 +1,7 @@
 from typing import Self
 
 from litestar import Controller, Request, delete, get, post
-from litestar.exceptions.http_exceptions import (
-    NotFoundException,
-)
+from litestar.exceptions.http_exceptions import NotFoundException
 
 from files.models.dto import FileProperties
 from files.models.repositories import FileRepository

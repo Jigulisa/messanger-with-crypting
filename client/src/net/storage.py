@@ -3,13 +3,13 @@ from http import HTTPStatus
 from requests import RequestException, delete, get, post
 
 from net.utils import get_auth_headers
-from settings.server import ServerMixin
+from settings import Settings
 
 
 def get_file_names() -> list[str] | None:
     try:
         response = get(
-            ServerMixin.get_server_storage_url("names"),
+            Settings.get_server_storage_url("/names"),
             timeout=10,
             headers=get_auth_headers(),
         )
@@ -27,7 +27,7 @@ def download_file(name: str) -> bytes | None:
 
     try:
         response = get(
-            ServerMixin.get_server_storage_url("download"),
+            Settings.get_server_storage_url("/download"),
             params=param,
             timeout=10,
             headers=get_auth_headers(),
@@ -45,7 +45,7 @@ def rename(old: str, new: str) -> str:
 
     try:
         response = post(
-            ServerMixin.get_server_storage_url("rename"),
+            Settings.get_server_storage_url("/rename"),
             data=param,
             timeout=10,
             headers=get_auth_headers(),
@@ -64,7 +64,7 @@ def get_file_properties(name: str) -> str:
 
     try:
         response = get(
-            ServerMixin.get_server_storage_url("properties/"),
+            Settings.get_server_storage_url("/properties"),
             params=param,
             timeout=10,
             headers=get_auth_headers(),
@@ -82,7 +82,7 @@ def delete_file(name: str) -> str:
     param = {"name": name}
     try:
         response = delete(
-            ServerMixin.get_server_storage_url("delete"),
+            Settings.get_server_storage_url("/delete"),
             data=param,
             timeout=10,
             headers=get_auth_headers(),

@@ -11,8 +11,10 @@ from litestar.plugins.sqlalchemy import (
     base,
 )
 
+from ai.router import router as ai_router
 from files.router import router as files_router
 from messages.router import router as messages_router
+from users.dependencies import dependencies as user_dependencies
 from users.middleware import AuthenticationMiddleware
 
 
@@ -29,12 +31,13 @@ class OnSturtup:
 
 
 app = Litestar(
-    route_handlers=[files_router, messages_router],
+    route_handlers=[files_router, messages_router, ai_router],
     on_startup=[OnSturtup()],
     plugins=[
         ChannelsPlugin(backend=MemoryChannelsBackend(), channels=["messages_channel"]),
         SQLAlchemyInitPlugin(config=OnSturtup.sqlalchemy_config),
     ],
+    dependencies=user_dependencies,
     middleware=[
         DefineMiddleware(
             AuthenticationMiddleware,

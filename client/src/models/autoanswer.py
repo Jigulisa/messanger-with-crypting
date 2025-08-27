@@ -1,5 +1,6 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
 from settings import Settings
 from settings.storage import Storage
 
@@ -37,6 +38,7 @@ def generate_auto_answer(text: str) -> bool:
     outputs = model(**inputs)
     probs = torch.softmax(outputs.logits, dim=-1)
     return bool(torch.argmax(probs).item())
+
 
 def dummy_generate_auto_answer(text: str) -> bool:
     return False

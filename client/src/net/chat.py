@@ -13,7 +13,7 @@ from requests import RequestException, post
 from websockets import ClientConnection, ConnectionClosed, connect
 
 from models.is_spam import predict_spam
-from net.message_struct import PrivateMessage
+from net.dto import MessageDTO
 from net.utils import get_auth_headers
 from secure.signature import sign, verify
 from settings import Settings
@@ -23,14 +23,14 @@ class WebSocketClient(Thread):
     @override
     def __init__(self: Self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self.queue_send_messages: Queue[PrivateMessage] = Queue()
-        self.queue_receive_messages: Queue[PrivateMessage] = Queue()
+        self.queue_send_messages: Queue[MessageDTO] = Queue()
+        self.queue_receive_messages: Queue[MessageDTO] = Queue()
         self.running = threading.Event()
         self.stop_event = asyncio.Event()
 
     def get_queues(
         self: Self,
-    ) -> tuple[Queue[PrivateMessage], Queue[PrivateMessage]]:
+    ) -> tuple[Queue[MessageDTO], Queue[MessageDTO]]:
         return self.queue_send_messages, self.queue_receive_messages
 
     @override
@@ -81,7 +81,7 @@ class WebSocketClient(Thread):
                 continue
 
             try:
-                verified_message = PrivateMessage.model_validate_json(message)
+                verified_message = MessageDTO.model_validate_json(message)
             except ValidationError:
                 continue
 
@@ -93,7 +93,7 @@ class WebSocketClient(Thread):
                 b85decode(verified_message.author),
             )
             if is_valid:
-                is_spam = bool(predict_spam(verified_message.message))
+                is_spam = predict_spam(verified_message.text)
                 verified_message.is_spam = is_spam
                 self.queue_receive_messages.put(verified_message)
 
@@ -102,9 +102,8 @@ class WebSocketClient(Thread):
         self.stop_event.set()
 
 
-def create_chat(name: str, description: str | None = None) -> bool:
+def create_chat(description: str | None = None) -> str | None:
     data = {
-        "name": name,
         "description": description,
     }
 
@@ -116,6 +115,9 @@ def create_chat(name: str, description: str | None = None) -> bool:
             headers=get_auth_headers(),
         )
     except RequestException:
-        return False
+        return None
 
-    return response.status_code == HTTPStatus.CREATED
+    if response.status_code != HTTPStatus.CREATED:
+        return None
+
+    return response.text

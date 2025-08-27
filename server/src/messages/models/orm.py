@@ -8,7 +8,6 @@ from users.models.orm import User
 
 
 class Chat(base.UUIDv7AuditBase):
-    name: Mapped[str]
     description: Mapped[str | None]
 
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))

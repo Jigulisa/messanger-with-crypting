@@ -38,7 +38,9 @@ from settings.storage import Storage
 class SignIn:
     def __init__(self) -> None:
         create_context()
+
         create_viewport(width=300, height=200)
+        self.password = None
         self.main_window = add_window(label="Cryptogram",
                                       width=290,
                                       height=220,
@@ -47,6 +49,7 @@ class SignIn:
                                       no_move=True,
                                       pos=[-1, -1],
                                       )
+
         with (
             font_registry(),
             font(str(Storage.base_dir / "fonts" / "font.otf"), 20) as default_font,
@@ -55,8 +58,10 @@ class SignIn:
             add_font_range_hint(mvFontRangeHint_Cyrillic)
             bind_font(default_font)
 
+
         add_text("Hello again, explorer!", parent=self.main_window)
-        self.password = add_input_text(
+        self.password_input = add_input_text(
+
             default_value="your password",
             parent=self.main_window,
         )
@@ -67,7 +72,7 @@ class SignIn:
         destroy_context()
 
     def on_password(self) -> None:
-        self.input_text = get_value(self.password)
+        self.password = get_value(self.password_input)
         stop_dearpygui()
 
 

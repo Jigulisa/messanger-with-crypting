@@ -7,20 +7,22 @@ from transformers import (
 from net.ai import get_spam_tracker_model
 from settings.storage import Storage
 
+tokenizer, model = None, None
 
 def predict_spam(text: str) -> bool:
+    global tokenizer, model  # noqa: PLW0603
     path = Storage.base_dir / ".cache/"
     model_name = "AventIQ-AI/distilbert-spam-detection"
-    if not (path / model_name).exists():
+    if tokenizer is None or model is None:
         get_spam_tracker_model()
-    tokenizer = DistilBertTokenizer.from_pretrained(
-    model_name,
-    cache_dir=path,
-    )
-    model = DistilBertForSequenceClassification.from_pretrained(
+        tokenizer = DistilBertTokenizer.from_pretrained(
         model_name,
         cache_dir=path,
-    )
+        )
+        model = DistilBertForSequenceClassification.from_pretrained(
+            model_name,
+            cache_dir=path,
+        )
     model.eval()
     inputs = tokenizer(
         text,

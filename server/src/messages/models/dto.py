@@ -13,10 +13,9 @@ class MessageDTO(BaseModel):
 
 
 class CreateChat(BaseModel):
-    name: str = Field(min_length=1)
     description: str | None = Field(min_length=1)
 
 
 class GrantAccess(BaseModel):
-    chat_id: int
+    chat_id: UUID
     user: str

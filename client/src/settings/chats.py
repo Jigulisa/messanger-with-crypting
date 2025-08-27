@@ -3,19 +3,12 @@ from settings.storage import Storage
 
 class ChatsMixin:
     @staticmethod
-    def add_chat(new_chat: str) -> str:
-        chats = set(Storage[list].get_value("chats", default=[]))
-        chats.add(new_chat)
-        Storage[list].set_value("chats", list(chats))
-        return new_chat
+    def add_chat(name: str, uuid: str) -> str:
+        chats = Storage[dict[str, str]].get_value("chats", default={})
+        chats[name] = uuid
+        Storage[dict[str, str]].set_value("chats", chats)
+        return name
 
     @staticmethod
-    def delete_chat(chat: str) -> str:
-        chats = set(Storage[list].get_value("chats", default=[]))
-        chats.remove(chat)
-        Storage[list].set_value("chats", list(chats))
-        return chat
-
-    @staticmethod
-    def get_chats() -> set[str]:
-        return set(Storage[list].get_value("chats", default=[]))
+    def get_chats() -> dict[str, str]:
+        return Storage[dict[str, str]].get_value("chats", default={})

@@ -77,6 +77,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
                 b85decode(signature),
                 b85decode(public_key),
             )
+
         if not is_valid:
             raise NotAuthorizedException
 

@@ -41,14 +41,15 @@ class SignIn:
 
         create_viewport(width=300, height=200)
         self.password = None
-        self.main_window = add_window(label="Cryptogram",
-                                      width=290,
-                                      height=220,
-                                      no_title_bar=True,
-                                      no_resize=True,
-                                      no_move=True,
-                                      pos=[-1, -1],
-                                      )
+        self.main_window = add_window(
+            label="Cryptogram",
+            width=290,
+            height=220,
+            no_title_bar=True,
+            no_resize=True,
+            no_move=True,
+            pos=[-1, -1],
+        )
 
         with (
             font_registry(),
@@ -58,10 +59,8 @@ class SignIn:
             add_font_range_hint(mvFontRangeHint_Cyrillic)
             bind_font(default_font)
 
-
         add_text("Hello again, explorer!", parent=self.main_window)
         self.password_input = add_input_text(
-
             default_value="your password",
             parent=self.main_window,
         )

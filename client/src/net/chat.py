@@ -120,4 +120,19 @@ def create_chat(description: str | None = None) -> str | None:
     if response.status_code != HTTPStatus.CREATED:
         return None
 
-    return response.text
+    return response.json()
+
+
+def grant_access(chat: str, user: str) -> None:
+    data = {
+        "chat_id": Settings.get_chat_uuid(chat),
+        "user": user,
+        "key": Settings.get_chet_key(chat),
+    }
+    with suppress(RequestException):
+        post(
+            Settings.get_server_chat_url("/grant"),
+            json=data,
+            timeout=10,
+            headers=get_auth_headers(),
+        )

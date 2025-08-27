@@ -19,3 +19,4 @@ class CreateChat(BaseModel):
 class GrantAccess(BaseModel):
     chat_id: UUID
     user: str
+    key: str

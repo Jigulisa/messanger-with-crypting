@@ -5,12 +5,12 @@ environ["OQS_INSTALL_PATH"] = str(
     Path(__file__).resolve().parent.parent / "libs" / "oqs",
 )
 
-from gui.app import Messenger, SignIn
+from gui.app import Messenger
 from net.chat import WebSocketClient
 
 
 def main() -> None:
-    password = SignIn().password
+    # password = SignIn().password
 
     websocket = WebSocketClient()
     websocket.start()

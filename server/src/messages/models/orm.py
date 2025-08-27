@@ -35,3 +35,5 @@ class Access(base.UUIDv7AuditBase):
     chat: Mapped[Chat] = relationship()
 
     role: Mapped[str]
+    secret: Mapped[str]
+    key: Mapped[str]

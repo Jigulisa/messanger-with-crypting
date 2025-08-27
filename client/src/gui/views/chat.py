@@ -21,6 +21,7 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
+from net.chat import create_chat
 from net.dto import MessageDTO
 from settings import Settings
 
@@ -51,6 +52,8 @@ class Chat(View):
         set_item_height("text_place", height // 10)
         set_item_pos("text_place", [width // 4, height - height // 10])
 
+        set_item_width("new_chat_name", get_item_width("chats_list") - 85)
+
     def create(self: Self) -> None:
         self.create_list()
         self.create_personal_zone()
@@ -59,6 +62,18 @@ class Chat(View):
 
     def create_list(self: Self) -> None:
         with child_window(label="Chats", tag="chats_list"):
+            group_id = add_group(parent="chats_list", horizontal=True)
+            add_input_text(
+                default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+                tag="new_chat_name",
+                width=get_item_width("chats_list") - 85,
+                parent=group_id,
+            )
+            add_button(
+                label="new chat",
+                callback=lambda: self.add_new_chat(get_value("new_chat_name")),
+                parent=group_id,
+            )
             self.chats = Settings.get_chats()
             for name in self.chats:
                 add_button(
@@ -107,7 +122,7 @@ class Chat(View):
                 text=inp,
                 sent_time=datetime.now(UTC),
                 author=Settings.get_public_key(),
-                chat_id=self.current_chat,
+                chat_id=Settings.get_chat_uuid(self.current_chat),
                 signature="",
             ),
         )
@@ -130,10 +145,27 @@ class Chat(View):
         with window(label="SPAM", width=350, height=450, no_resize=True):
             add_text(text, wrap=430)
 
+    def add_new_chat(self, name: str) -> None:
+        uuid = create_chat()
+        if uuid is not None:
+            Settings.add_chat(name, uuid)
+        self.update_chat_list()
+
     def update_chat_list(self) -> None:
         chats = Settings.get_chats()
         delete_item("chats_list", children_only=True)
-        add_button(label="new chat", callback=lambda: ..., parent="chats_list")
+        group_id = add_group(parent="chats_list", horizontal=True)
+        add_input_text(
+            default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+            tag="new_chat_name",
+            width=get_item_width("chats_list") - 85,
+            parent=group_id,
+        )
+        add_button(
+            label="new chat",
+            callback=lambda: self.add_new_chat(get_value("new_chat_name")),
+            parent=group_id,
+        )
         for name in chats:
             add_button(
                 label=name,

@@ -31,6 +31,7 @@ class OnSturtup:
 
 
 app = Litestar(
+    allowed_hosts=["*"],
     route_handlers=[files_router, messages_router, ai_router],
     on_startup=[OnSturtup()],
     plugins=[

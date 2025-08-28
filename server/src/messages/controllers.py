@@ -182,7 +182,7 @@ class ChatController(Controller):
         chat = await chat_repository.get(data.chat_id)
         if request.user != chat.owner:
             raise PermissionDeniedException
-        user = await user_repository.get_one(public_key=data.user)
+        user = await user_repository.get_one(username=data.user)
         access_data = data.model_dump()
         access_data["user"] = user
         await access_repository.add(Access(**access_data))

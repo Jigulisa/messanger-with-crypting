@@ -43,10 +43,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
     def check_timestamp(self: Self, connection: ASGIConnection) -> None:
         timestamp = datetime.fromisoformat(self.get_header(connection, "X-Timestamp"))
 
-        if datetime.now(UTC) < timestamp:
-            raise NotAuthorizedException
-
-        if datetime.now(UTC) - timestamp > timedelta(minutes=1):
+        if abs(datetime.now(UTC) - timestamp) > timedelta(minutes=1):
             raise NotAuthorizedException
 
     async def check_replay(self: Self, connection: ASGIConnection) -> tuple[str, str]:
@@ -60,7 +57,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
         await self.store.set(
             key,
             value="",
-            expires_in=timedelta(minutes=1),
+            expires_in=timedelta(minutes=2),
         )
 
         return dsa_public_key, nonce
@@ -98,7 +95,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             )
             if user is None:
                 user = await user_repository.add(
-                    User(dsa_public_key=dsa_public_key, kem_public_key=kem_public_key),
+                    User(dsa_public_key=dsa_public_key, kem_public_key=kem_public_key, username=dsa_public_key[:10]),
                 )
 
         return AuthenticationResult(user=user, auth=dsa_public_key)

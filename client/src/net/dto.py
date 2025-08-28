@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 class MessageDTO(BaseModel):
     text: str
+    salt: str
     sent_time: datetime
     author: str
     chat_id: UUID

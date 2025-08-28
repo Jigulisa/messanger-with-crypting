@@ -24,7 +24,7 @@ from dearpygui.dearpygui import (
 from gui.views.core import View
 from net.chat import create_chat
 from net.dto import MessageDTO
-from secure.aead import encrypt, generate_key
+from secure.aead import decrypt, encrypt, generate_key
 from secure.kdf import get_n_bytes_password
 from secure.kem import encap_secret
 from settings import Settings
@@ -124,11 +124,13 @@ class Chat(View):
         self.current_chat = selected_chat
 
     def on_sending(self: Self) -> None:
-        inp = get_value("input")
+        text = get_value("input")
         set_value("input", "")
+        encrypted_text, salt = encrypt(Settings.get_chat_key(self.current_chat), text)
         self.queue_send.put(
             MessageDTO(
-                text=inp,
+                text=encrypted_text,
+                salt=salt,
                 sent_time=datetime.now(UTC),
                 author=Settings.get_dsa_public_key(),
                 chat_id=Settings.get_chat_uuid(self.current_chat),
@@ -137,6 +139,7 @@ class Chat(View):
         )
 
     def on_receiving(self: Self, message: MessageDTO) -> None:
+        message.text = decrypt(Settings.get_chat_key_by_uuid(message.chat_id), message.text, message.salt)
         if not message.is_spam:
             add_text(
                 f"{message.author[:6]}: {message.text}",

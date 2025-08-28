@@ -59,6 +59,7 @@ class MessageCallback:
         await self.message_repository.add(
             Message(
                 text=message.text,
+                salt=message.salt,
                 sent_time=message.sent_time,
                 author=author,
                 chat_id=message.chat_id,

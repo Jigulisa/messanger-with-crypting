@@ -14,8 +14,16 @@ class MessageDTO(BaseModel):
 
 class CreateChat(BaseModel):
     description: str | None = Field(min_length=1)
+    secret: str
+    secret_salt: str
+    key: str
+    key_salt: str
 
 
 class GrantAccess(BaseModel):
     chat_id: UUID
     user: str
+    secret: str
+    secret_salt: str
+    key: str
+    key_salt: str

@@ -128,8 +128,6 @@ class Messenger:
         )
 
     def run(self) -> None:
-        start_dearpygui()
-
         while is_dearpygui_running():
             with suppress(Empty):
                 ViewName.CHAT.value.on_receiving(self.queue_receive.get_nowait())

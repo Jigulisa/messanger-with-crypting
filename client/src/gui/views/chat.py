@@ -23,7 +23,7 @@ from dearpygui.dearpygui import (
 )
 
 from gui.views.core import View
-from net.chat import create_chat
+from net.chat import create_chat, grant_access
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
 from secure.kdf import get_n_bytes_password
@@ -97,7 +97,21 @@ class Chat(View):
             group_id = add_group(horizontal=True)
 
             add_text("no1", tag="chat_name", parent=group_id)
-            add_button(label="+", parent=group_id)
+            add_button(label="+", parent=group_id, callback=self.on_adding_user)
+
+    def on_adding_user(self) -> None:
+        with child_window(label="new participant", tag="new_user"):
+            self.user_id = add_input_text(
+                default_value="new user",
+                tag="input",
+            )
+            add_button(
+                label="ok",
+                callback=lambda: self.on_new_user(get_value(self.user_id)),
+            )
+
+    def on_new_user(self, new_user: str) -> None:
+        grant_access(new_user, self.current_chat)
 
     def create_chat_place(self: Self) -> None:
         with child_window(label="Messages", tag="chat_place", border=False):

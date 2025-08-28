@@ -1,7 +1,7 @@
 import asyncio
 import threading
 from asyncio import gather, run, sleep
-from base64 import b85decode
+from base64 import b85decode, b85encode
 from contextlib import suppress
 from http import HTTPStatus
 from queue import Empty, Queue
@@ -9,12 +9,15 @@ from threading import Thread
 from typing import Any, Self, override
 
 from pydantic import ValidationError
-from requests import RequestException, post
+from requests import RequestException, get, post
 from websockets import ClientConnection, ConnectionClosed, connect
 
 from models.is_spam import predict_spam
-from net.dto import MessageDTO
+from net.dto import AccessChatDTO, MessageDTO
 from net.utils import get_auth_headers
+from secure.aead import decrypt
+from secure.kdf import get_n_bytes_password
+from secure.kem import decap_secret, encap_chat_key
 from secure.signature import sign, verify
 from settings import Settings
 
@@ -107,9 +110,11 @@ def create_chat(
     secret_salt: str,
     encrypted_key: str,
     key_salt: str,
+    name: str,
     description: str | None = None,
 ) -> str | None:
     data = {
+        "chat_name": name,
         "description": description,
         "secret": secret,
         "secret_salt": secret_salt,
@@ -133,11 +138,42 @@ def create_chat(
     return response.json()
 
 
-def grant_access(chat: str, user: str) -> None:
+def get_user_kem_public_key(username: str) -> str | None:
     data = {
-        "chat_id": Settings.get_chat_uuid(chat),
+        "username": username,
+    }
+    try:
+        response = get(
+            Settings.get_server_users_url("/kem"),
+            params=data,
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return None
+
+    if response.status_code != HTTPStatus.OK:
+        return None
+
+    return response.text
+
+
+def grant_access(chat_uuid: str, user: str) -> None:
+    user_kem_public_key = get_user_kem_public_key(user)
+    if user_kem_public_key is None:
+        return
+
+    secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
+        user_kem_public_key,
+        b85encode(Settings.get_chat_key(chat_uuid)).decode(),
+    )
+    data = {
+        "chat_id": chat_uuid,
         "user": user,
-        "key": Settings.get_chat_key(chat),
+        "secret": secret,
+        "secret_salt": secret_salt,
+        "key": encrypted_key,
+        "key_salt": key_salt,
     }
     with suppress(RequestException):
         post(
@@ -146,3 +182,38 @@ def grant_access(chat: str, user: str) -> None:
             timeout=10,
             headers=get_auth_headers(),
         )
+
+
+def get_all_chats() -> None:
+    try:
+        response = get(
+            Settings.get_server_chat_url("/all"),
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return
+
+    if response.status_code != HTTPStatus.OK:
+        return
+
+    access_list = response.json()
+
+    chats = Settings.get_chats()
+    for chat in set(chats.keys()).difference(
+        {access["chat_id"] for access in access_list},
+    ):
+        chats.pop(chat)
+
+    for chat in access_list:
+        access = AccessChatDTO.model_validate(chat)
+        secret = decap_secret(access.secret, Settings.get_kem_private_key())
+        password, _ = get_n_bytes_password(secret, 32, b85decode(access.secret_salt))
+        key = decrypt(password, access.key, access.key_salt)
+        uuid = str(access.chat_id)
+        chats[uuid] = {
+            "name": access.chat_name or uuid,
+            "key": key,
+        }
+
+    Settings.set_chats(chats)

@@ -30,7 +30,7 @@ class Settings(View):
     def create(self: Self) -> None:
         add_text("Settings")
         self.create_appearance_set()
-        self.create_roles_place()
+        self.new_username_place()
         self.fill_in_form()
 
     def create_appearance_set(self: Self) -> None:
@@ -76,10 +76,12 @@ class Settings(View):
         )
         add_button(label="Select", callback=self.on_panels_color)
 
-    def create_roles_place(self: Self) -> None:
-        add_input_text(label="chat")
-        add_input_text(label="new role")
+    def new_username_place(self: Self) -> None:
+        self.new_username = add_input_text(default_value="your new username")
+        add_button(label="ok", callback=self.on_new_username)
 
+    def on_new_username(self) -> None:
+        pass
     def fill_in_form(self: Self) -> None:
         add_button(label="Fill in form", callback=self.on_form)
 

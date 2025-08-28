@@ -8,15 +8,11 @@ authors = [
 ]
 requires-python = ">=3.13, <3.14"
 dependencies = [
-    "blobfile>=3.0.0",
     "cryptography",
     "dearpygui",
-    "hf-xet",
     "liboqs-python",
     "msgspec[toml]",
-    "protobuf>=6.32.0",
     "pydantic",
-    "tiktoken>=0.11.0",
     "torch",
     "transformers",
     "websockets",

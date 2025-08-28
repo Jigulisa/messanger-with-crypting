@@ -4,18 +4,22 @@ from uuid import UUID
 
 from settings.storage import Storage
 
-type Chat = dict[Literal["uuid", "key"], str]
+type Chat = dict[Literal["name", "key"], str]
 
 
 class ChatsMixin:
     @staticmethod
+    def set_chats(chats: dict[str, Chat]) -> dict[str, Chat]:
+        return Storage[dict[str, Chat]].set_value("chats", chats)
+
+    @staticmethod
     def add_chat(name: str, uuid: str, key: str) -> str:
         chats = Storage[dict[str, Chat]].get_value("chats", default={})
-        chats[name] = {
-            "uuid": uuid,
+        chats[uuid] = {
+            "name": name,
             "key": key,
         }
-        Storage[dict[str, Chat]].set_value("chats", chats)
+        ChatsMixin.set_chats(chats)
         return name
 
     @staticmethod
@@ -23,20 +27,15 @@ class ChatsMixin:
         return Storage[dict[str, Chat]].get_value("chats", default={})
 
     @staticmethod
-    def get_chat(name: str) -> Chat:
-        return ChatsMixin.get_chats()[name]
+    def get_chat(uuid: str) -> Chat:
+        return ChatsMixin.get_chats()[uuid]
 
     @staticmethod
-    def get_chat_uuid(name: str) -> UUID:
-        return UUID(ChatsMixin.get_chat(name)["uuid"])
+    def get_chat_name(uuid: str) -> str:
+        return ChatsMixin.get_chat(uuid)["name"]
 
     @staticmethod
-    def get_chat_key(name: str) -> bytes:
-        return b85decode(ChatsMixin.get_chat(name)["key"])
-
-    @staticmethod
-    def get_chat_key_by_uuid(uuid: UUID) -> bytes:
-        for chat in ChatsMixin.get_chats().values():
-            if chat["uuid"] == str(uuid):
-                return b85decode(chat["key"])
-        raise KeyError
+    def get_chat_key(uuid: UUID | str) -> bytes:
+        if isinstance(uuid, UUID):
+            uuid = str(uuid)
+        return b85decode(ChatsMixin.get_chat(uuid)["key"])

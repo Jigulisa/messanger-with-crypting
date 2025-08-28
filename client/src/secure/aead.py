@@ -16,4 +16,6 @@ def encrypt(key: bytes, text: str) -> tuple[str, str]:
 
 
 def decrypt(key: bytes, text: str, nonce: str) -> str:
-    return ChaCha20Poly1305(key).decrypt(b85decode(nonce), b85decode(text), None).decode()
+    return (
+        ChaCha20Poly1305(key).decrypt(b85decode(nonce), b85decode(text), None).decode()
+    )

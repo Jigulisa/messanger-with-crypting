@@ -98,8 +98,8 @@ class Messenger:
             title="Cryptogramm",
             width=width,
             height=height,
-            min_width=0,
-            min_height=0,
+            min_width=260,
+            min_height=400,
         )
         set_exit_callback(exit_callback)
         set_viewport_resize_callback(self.resize)

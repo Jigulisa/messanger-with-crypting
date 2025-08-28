@@ -13,7 +13,17 @@ class MessageDTO(BaseModel):
     signature: str
 
 
+class AccessChatDTO(BaseModel):
+    chat_id: UUID
+    chat_name: str | None
+    secret: str
+    secret_salt: str
+    key: str
+    key_salt: str
+
+
 class CreateChat(BaseModel):
+    chat_name: str | None = Field(min_length=1, default=None)
     description: str | None = Field(min_length=1)
     secret: str
     secret_salt: str

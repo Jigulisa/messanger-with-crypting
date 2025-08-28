@@ -49,3 +49,7 @@ class ServerMixin:
     @staticmethod
     def get_server_ai_url(postfix: str = "") -> str:
         return ServerMixin.get_server_http_url(f"/ai{postfix}")
+
+    @staticmethod
+    def get_server_users_url(postfix: str = "") -> str:
+        return ServerMixin.get_server_http_url(f"/users{postfix}")

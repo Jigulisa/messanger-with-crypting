@@ -16,6 +16,7 @@ class View(ResizeMixin):
         super().resize(width, height, position)
         ViewName.CHAT.value.resize(width, height)
         ViewName.HELP.value.resize(width, height)
+        ViewName.STORAGE.value.resize(width, height)
 
     def __init__(self) -> None:
         with window(

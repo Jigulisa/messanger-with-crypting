@@ -14,9 +14,9 @@ from litestar.plugins.sqlalchemy import (
 from ai.router import router as ai_router
 from files.router import router as files_router
 from messages.router import router as messages_router
-from users.router import router as users_router
 from users.dependencies import dependencies as user_dependencies
 from users.middleware import AuthenticationMiddleware
+from users.router import router as users_router
 
 
 class OnSturtup:

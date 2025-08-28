@@ -95,7 +95,11 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             )
             if user is None:
                 user = await user_repository.add(
-                    User(dsa_public_key=dsa_public_key, kem_public_key=kem_public_key, username=dsa_public_key[:10]),
+                    User(
+                        dsa_public_key=dsa_public_key,
+                        kem_public_key=kem_public_key,
+                        username=dsa_public_key[:10],
+                    ),
                 )
 
         return AuthenticationResult(user=user, auth=dsa_public_key)

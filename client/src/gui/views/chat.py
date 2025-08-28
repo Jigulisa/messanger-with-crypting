@@ -100,7 +100,11 @@ class Chat(View):
             add_button(label="+", parent=group_id, callback=self.on_adding_user)
 
     def on_adding_user(self) -> None:
-        self.add_user_window = add_window(label="new participant", width=300, height=250)
+        self.add_user_window = add_window(
+            label="new participant",
+            width=300,
+            height=250,
+        )
         self.user_id = add_input_text(
             default_value="new user",
             parent=self.add_user_window,

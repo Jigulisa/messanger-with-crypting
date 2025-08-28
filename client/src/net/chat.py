@@ -64,7 +64,7 @@ class WebSocketClient(Thread):
 
             message.signature = sign(
                 message.model_dump_json(exclude={"signature"}).encode(),
-                Settings.get_private_key(),
+                Settings.get_dsa_private_key(),
             )
             message_json = message.model_dump_json()
             try:
@@ -102,9 +102,19 @@ class WebSocketClient(Thread):
         self.stop_event.set()
 
 
-def create_chat(description: str | None = None) -> str | None:
+def create_chat(
+    secret: str,
+    secret_salt: str,
+    encrypted_key: str,
+    key_salt: str,
+    description: str | None = None,
+) -> str | None:
     data = {
         "description": description,
+        "secret": secret,
+        "secret_salt": secret_salt,
+        "key": encrypted_key,
+        "key_salt": key_salt,
     }
 
     try:

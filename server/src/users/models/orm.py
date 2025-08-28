@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 class User(base.UUIDv7AuditBase):
-    public_key: Mapped[str] = mapped_column(unique=True)
+    dsa_public_key: Mapped[str] = mapped_column(unique=True)
+    kem_public_key: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str | None]
     personal_data: Mapped[str | None]

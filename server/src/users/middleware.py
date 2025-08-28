@@ -14,6 +14,7 @@ from litestar.stores.memory import MemoryStore
 from oqs import Signature
 
 from users.dependencies import provide_user_repository
+from users.models.orm import User
 from users.models.repositories import UserRepository
 
 if TYPE_CHECKING:
@@ -49,9 +50,9 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             raise NotAuthorizedException
 
     async def check_replay(self: Self, connection: ASGIConnection) -> tuple[str, str]:
-        public_key = self.get_header(connection, "X-Public-Key")
+        dsa_public_key = self.get_header(connection, "X-DSA-Public-Key")
         nonce = self.get_header(connection, "X-Nonce")
-        key = f"{public_key}:{nonce}"
+        key = f"{dsa_public_key}:{nonce}"
 
         if await self.store.exists(key):
             raise NotAuthorizedException
@@ -62,12 +63,12 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             expires_in=timedelta(minutes=1),
         )
 
-        return public_key, nonce
+        return dsa_public_key, nonce
 
     def check_signature(
         self: Self,
         connection: ASGIConnection,
-        public_key: str,
+        dsa_public_key: str,
         nonce: str,
     ) -> None:
         signature = self.get_header(connection, "X-Signature")
@@ -75,7 +76,7 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
             is_valid = verifier.verify(
                 b85decode(nonce),
                 b85decode(signature),
-                b85decode(public_key),
+                b85decode(dsa_public_key),
             )
 
         if not is_valid:
@@ -86,13 +87,18 @@ class AuthenticationMiddleware(AbstractAuthenticationMiddleware):
         connection: ASGIConnection,
     ) -> AuthenticationResult:
         self.check_timestamp(connection)
-        public_key, nonce = await self.check_replay(connection)
-        self.check_signature(connection, public_key, nonce)
+        dsa_public_key, nonce = await self.check_replay(connection)
+        self.check_signature(connection, dsa_public_key, nonce)
 
+        kem_public_key = self.get_header(connection, "X-KEM-Public-Key")
         async with self.get_user_repository() as user_repository:
-            user, _ = await user_repository.get_or_upsert(
-                public_key=public_key,
-                upsert=False,
+            user = await user_repository.get_one_or_none(
+                dsa_public_key=dsa_public_key,
+                kem_public_key=kem_public_key,
             )
+            if user is None:
+                user = await user_repository.add(
+                    User(dsa_public_key=dsa_public_key, kem_public_key=kem_public_key),
+                )
 
-        return AuthenticationResult(user=user, auth=public_key)
+        return AuthenticationResult(user=user, auth=dsa_public_key)

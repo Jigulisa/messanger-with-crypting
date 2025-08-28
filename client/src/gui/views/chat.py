@@ -4,6 +4,7 @@ from typing import Self
 
 from dearpygui.dearpygui import (
     add_button,
+    add_child_window,
     add_group,
     add_input_text,
     add_text,
@@ -23,6 +24,9 @@ from dearpygui.dearpygui import (
 from gui.views.core import View
 from net.chat import create_chat
 from net.dto import MessageDTO
+from secure.aead import encrypt, generate_key
+from secure.kdf import get_n_bytes_password
+from secure.kem import encap_secret
 from settings import Settings
 
 
@@ -36,9 +40,9 @@ class Chat(View):
         return "chat"
 
     def resize(self: Self, width: int, height: int) -> None:
-        set_item_width("chats_list", width // 4)
-        set_item_height("chats_list", height)
-        set_item_pos("chats_list", [0, 0])
+        set_item_width(self.chat_list_window, width // 4)
+        set_item_height(self.chat_list_window, height)
+        set_item_pos(self.chat_list_window, [0, 0])
 
         set_item_width("personal_zone", width - width // 4)
         set_item_height("personal_zone", height // 10)
@@ -52,7 +56,7 @@ class Chat(View):
         set_item_height("text_place", height // 10)
         set_item_pos("text_place", [width // 4, height - height // 10])
 
-        set_item_width("new_chat_name", get_item_width("chats_list") - 85)
+        set_item_width("new_chat_name", get_item_width(self.chat_list_window) - 85)
 
     def create(self: Self) -> None:
         self.create_list()
@@ -61,27 +65,32 @@ class Chat(View):
         self.create_text_zone()
 
     def create_list(self: Self) -> None:
-        with child_window(label="Chats", tag="chats_list"):
-            group_id = add_group(parent="chats_list", horizontal=True)
-            add_input_text(
-                default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
-                tag="new_chat_name",
-                width=get_item_width("chats_list") - 85,
-                parent=group_id,
-            )
+        self.chat_list_window = add_child_window(label="Chats")
+        self.update_chat_list()
+
+    def update_chat_list(self) -> None:
+        delete_item(self.chat_list_window, children_only=True)
+        group_id = add_group(parent=self.chat_list_window, horizontal=True)
+        add_input_text(
+            default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+            tag="new_chat_name",
+            width=get_item_width(self.chat_list_window) - 85,
+            parent=group_id,
+        )
+        add_button(
+            label="new chat",
+            callback=lambda: self.add_new_chat(get_value("new_chat_name")),
+            parent=group_id,
+        )
+        chats = Settings.get_chats()
+        for name in chats:
             add_button(
-                label="new chat",
-                callback=lambda: self.add_new_chat(get_value("new_chat_name")),
-                parent=group_id,
+                label=name,
+                tag=name,
+                callback=lambda *, selected_chat=name: self.callback(selected_chat),
+                parent=self.chat_list_window,
             )
-            self.chats = Settings.get_chats()
-            for name in self.chats:
-                add_button(
-                    label=name,
-                    tag=name,
-                    callback=lambda *, selected_chat=name: self.callback(selected_chat),
-                )
-            add_button(label="new chat", parent="chats_list")
+        self.chats = chats
 
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
@@ -121,7 +130,7 @@ class Chat(View):
             MessageDTO(
                 text=inp,
                 sent_time=datetime.now(UTC),
-                author=Settings.get_public_key(),
+                author=Settings.get_dsa_public_key(),
                 chat_id=Settings.get_chat_uuid(self.current_chat),
                 signature="",
             ),
@@ -146,31 +155,11 @@ class Chat(View):
             add_text(text, wrap=430)
 
     def add_new_chat(self, name: str) -> None:
-        uuid = create_chat()
+        ciphertext, secret = encap_secret(Settings.get_kem_public_key())
+        password, secret_salt = get_n_bytes_password(secret, 32)
+        key = generate_key()
+        encrypted_key, key_salt = encrypt(password, key)
+        uuid = create_chat(ciphertext, secret_salt, encrypted_key, key_salt)
         if uuid is not None:
-            Settings.add_chat(name, uuid)
+            Settings.add_chat(name, uuid, key)
         self.update_chat_list()
-
-    def update_chat_list(self) -> None:
-        chats = Settings.get_chats()
-        delete_item("chats_list", children_only=True)
-        group_id = add_group(parent="chats_list", horizontal=True)
-        add_input_text(
-            default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
-            tag="new_chat_name",
-            width=get_item_width("chats_list") - 85,
-            parent=group_id,
-        )
-        add_button(
-            label="new chat",
-            callback=lambda: self.add_new_chat(get_value("new_chat_name")),
-            parent=group_id,
-        )
-        for name in chats:
-            add_button(
-                label=name,
-                tag=name,
-                callback=lambda *, selected_chat=name: self.callback(selected_chat),
-                parent="chats_list",
-            )
-        self.chats = chats

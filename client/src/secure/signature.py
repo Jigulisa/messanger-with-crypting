@@ -13,7 +13,7 @@ def sign(message: bytes, private_key: bytes) -> str:
         return b85encode(signer.sign(message)).decode()
 
 
-def generate_keypair() -> tuple[bytes, bytes]:
+def generate_dsa_keypair() -> tuple[bytes, bytes]:
     with Signature("ML-DSA-87") as generator:
         public_key = generator.generate_keypair()
         return generator.export_secret_key(), public_key

@@ -8,9 +8,11 @@ def generate_key() -> str:
     return b85encode(ChaCha20Poly1305.generate_key()).decode()
 
 
-def encrypt(key: bytes, text: str) -> tuple[bytes, bytes]:
+def encrypt(key: bytes, text: str) -> tuple[str, str]:
     nonce = urandom(12)
-    return ChaCha20Poly1305(key).encrypt(nonce, text.encode(), None), nonce
+    return b85encode(
+        ChaCha20Poly1305(key).encrypt(nonce, text.encode(), None),
+    ).decode(), b85encode(nonce).decode()
 
 
 def decrypt(key: bytes, text: bytes, nonce: bytes) -> str:

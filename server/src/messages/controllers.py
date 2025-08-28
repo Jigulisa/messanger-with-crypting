@@ -55,7 +55,7 @@ class MessageCallback:
         if message is None:
             return
 
-        author = await self.user_repository.get_one(public_key=message.author)
+        author = await self.user_repository.get_one(dsa_public_key=message.author)
         await self.message_repository.add(
             Message(
                 text=message.text,
@@ -67,12 +67,10 @@ class MessageCallback:
             auto_commit=True,
         )
 
-        chat_users = {
-            access.user.public_key
-            for access in await self.access_repository.list(chat_id=message.chat_id)
-        }
-
-        if self.socket.auth in chat_users:
+        if await self.access_repository.exists(
+            chat_id=message.chat_id,
+            user=self.socket.user,
+        ):
             await self.socket.send_data(message.model_dump_json())
 
 
@@ -115,12 +113,13 @@ class ChatController(Controller):
         chat_repository: ChatRepository,
         access_repository: AccessRepository,
     ) -> UUID:
+        dict_data = data.model_dump()
         chat = await chat_repository.add(
-            Chat(**data.model_dump(), owner=request.user),
+            Chat(description=dict_data.pop("description"), owner=request.user),
             auto_commit=True,
         )
         await access_repository.add(
-            Access(user=request.user, chat=chat, role=request.auth, secret="", key=""),
+            Access(user=request.user, chat=chat, role=request.auth, **dict_data),
             auto_commit=True,
         )
         return chat.id
@@ -138,9 +137,9 @@ class ChatController(Controller):
         if request.user != chat.owner:
             raise PermissionDeniedException
         user = await user_repository.get_one(public_key=data.user)
-        await access_repository.add(
-            Access(user=user, chat=chat, role=data.user, key=data.key),
-        )
+        access_data = data.model_dump()
+        access_data["user"] = user
+        await access_repository.add(Access(**access_data))
 
     @get("/{chat_id:uuid}")
     async def get_chat_messages(
@@ -156,7 +155,7 @@ class ChatController(Controller):
             MessageDTO(
                 text=message.text,
                 sent_time=message.sent_time,
-                author=message.author.public_key,
+                author=message.author.dsa_public_key,
                 chat_id=chat_id,
                 signature=message.signature,
             )

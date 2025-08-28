@@ -1,7 +1,6 @@
 from typing import Literal
 from uuid import UUID
 
-from secure.aead import generate_key
 from settings.storage import Storage
 
 type Chat = dict[Literal["uuid", "key"], str]
@@ -9,11 +8,11 @@ type Chat = dict[Literal["uuid", "key"], str]
 
 class ChatsMixin:
     @staticmethod
-    def add_chat(name: str, uuid: str) -> str:
+    def add_chat(name: str, uuid: str, key: str) -> str:
         chats = Storage[dict[str, Chat]].get_value("chats", default={})
         chats[name] = {
             "uuid": uuid,
-            "key": generate_key(),
+            "key": key,
         }
         Storage[dict[str, Chat]].set_value("chats", chats)
         return name

@@ -165,7 +165,7 @@ class ChatController(Controller):
             auto_commit=True,
         )
         await access_repository.add(
-            Access(user=request.user, chat=chat, role=request.auth, **dict_data),
+            Access(user=request.user, chat=chat, role=request.user.username, **dict_data),
             auto_commit=True,
         )
         return chat.id
@@ -180,12 +180,10 @@ class ChatController(Controller):
         access_repository: AccessRepository,
     ) -> None:
         chat = await chat_repository.get(data.chat_id)
-        if request.user != chat.owner:
+        if request.user.id != chat.owner_id:
             raise PermissionDeniedException
         user = await user_repository.get_one(username=data.user)
-        access_data = data.model_dump()
-        access_data["user"] = user
-        await access_repository.add(Access(**access_data))
+        await access_repository.add(Access(user=user, chat=chat, chat_name=request.user.username, role=user.username, secret=data.secret, secret_salt=data.secret_salt, key=data.key, key_salt=data.key_salt), auto_commit=True)
 
     @get("/{chat_id:uuid}")
     async def get_chat_messages(

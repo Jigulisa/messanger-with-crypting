@@ -138,9 +138,33 @@ def create_chat(
     return response.json()
 
 
+def get_user_kem_public_key(username: str) -> str | None:
+    data = {
+        "username": username,
+    }
+    try:
+        response = get(
+            Settings.get_server_users_url("/kem"),
+            params=data,
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return None
+
+    if response.status_code != HTTPStatus.OK:
+        return None
+
+    return response.json()
+
+
 def grant_access(chat_uuid: str, user: str) -> None:
+    user_kem_public_key = get_user_kem_public_key(user)
+    if user_kem_public_key is None:
+        return
+
     secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
-        user,
+        user_kem_public_key,
         b85encode(Settings.get_chat_key(chat_uuid)).decode(),
     )
     data = {

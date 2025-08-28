@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from queue import Queue
 from typing import Self
+from uuid import UUID
 
 from dearpygui.dearpygui import (
     add_button,
@@ -83,14 +84,13 @@ class Chat(View):
             parent=group_id,
         )
         chats = Settings.get_chats()
-        for name in chats:
+        for uuid, chat in chats.items():
             add_button(
-                label=name,
-                tag=name,
-                callback=lambda *, selected_chat=name: self.callback(selected_chat),
+                label=chat["name"],
+                tag=uuid,
+                callback=lambda *, selected_chat=uuid: self.callback(selected_chat),
                 parent=self.chat_list_window,
             )
-        self.chats = chats
 
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
@@ -120,7 +120,7 @@ class Chat(View):
 
     def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)
-        set_value("chat_name", selected_chat)
+        set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat
 
     def on_sending(self: Self) -> None:
@@ -133,13 +133,17 @@ class Chat(View):
                 salt=salt,
                 sent_time=datetime.now(UTC),
                 author=Settings.get_dsa_public_key(),
-                chat_id=Settings.get_chat_uuid(self.current_chat),
+                chat_id=UUID(self.current_chat),
                 signature="",
             ),
         )
 
     def on_receiving(self: Self, message: MessageDTO) -> None:
-        message.text = decrypt(Settings.get_chat_key_by_uuid(message.chat_id), message.text, message.salt)
+        message.text = decrypt(
+            Settings.get_chat_key(message.chat_id),
+            message.text,
+            message.salt,
+        )
         if not message.is_spam:
             add_text(
                 f"{message.author[:6]}: {message.text}",
@@ -162,7 +166,7 @@ class Chat(View):
         password, secret_salt = get_n_bytes_password(secret, 32)
         key = generate_key()
         encrypted_key, key_salt = encrypt(password, key)
-        uuid = create_chat(ciphertext, secret_salt, encrypted_key, key_salt)
+        uuid = create_chat(ciphertext, secret_salt, encrypted_key, key_salt, name)
         if uuid is not None:
             Settings.add_chat(name, uuid, key)
         self.update_chat_list()

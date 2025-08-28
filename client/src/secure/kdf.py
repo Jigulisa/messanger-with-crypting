@@ -4,8 +4,12 @@ from os import urandom
 from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 
 
-def get_n_bytes_password(password: bytes, n: int) -> tuple[bytes, str]:
-    salt = urandom(16)
+def get_n_bytes_password(
+    password: bytes,
+    n: int,
+    salt: bytes | None = None,
+) -> tuple[bytes, str]:
+    salt = salt or urandom(16)
     lanes = 4
     kdf = Argon2id(
         salt=salt,

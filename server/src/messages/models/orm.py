@@ -35,6 +35,8 @@ class Access(base.UUIDv7AuditBase):
     chat_id: Mapped[UUID] = mapped_column(ForeignKey("chat.id"))
     chat: Mapped[Chat] = relationship()
 
+    chat_name: Mapped[str | None]
+
     role: Mapped[str]
 
     secret: Mapped[str]

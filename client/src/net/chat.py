@@ -155,7 +155,7 @@ def get_user_kem_public_key(username: str) -> str | None:
     if response.status_code != HTTPStatus.OK:
         return None
 
-    return response.json()
+    return response.text
 
 
 def grant_access(chat_uuid: str, user: str) -> None:

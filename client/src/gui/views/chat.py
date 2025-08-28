@@ -9,6 +9,7 @@ from dearpygui.dearpygui import (
     add_group,
     add_input_text,
     add_text,
+    add_window,
     child_window,
     delete_item,
     get_item_width,
@@ -99,18 +100,19 @@ class Chat(View):
             add_button(label="+", parent=group_id, callback=self.on_adding_user)
 
     def on_adding_user(self) -> None:
-        with child_window(label="new participant", tag="new_user"):
-            self.user_id = add_input_text(
-                default_value="new user",
-                tag="input",
-            )
-            add_button(
-                label="ok",
-                callback=lambda: self.on_new_user(get_value(self.user_id)),
-            )
+        self.add_user_window = add_window(label="new participant", width=300, height=250)
+        self.user_id = add_input_text(
+            default_value="new user",
+            parent=self.add_user_window,
+        )
+        add_button(
+            label="ok",
+            callback=lambda: self.on_new_user(get_value(self.user_id)),
+            parent=self.add_user_window,
+        )
 
     def on_new_user(self, new_user: str) -> None:
-        grant_access(new_user, self.current_chat)
+        grant_access(self.current_chat, new_user)
 
     def create_chat_place(self: Self) -> None:
         with child_window(label="Messages", tag="chat_place", border=False):

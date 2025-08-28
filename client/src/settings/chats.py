@@ -1,3 +1,4 @@
+from base64 import b85decode
 from typing import Literal
 from uuid import UUID
 
@@ -30,5 +31,12 @@ class ChatsMixin:
         return UUID(ChatsMixin.get_chat(name)["uuid"])
 
     @staticmethod
-    def get_chet_key(name: str) -> str:
-        return ChatsMixin.get_chat(name)["key"]
+    def get_chat_key(name: str) -> bytes:
+        return b85decode(ChatsMixin.get_chat(name)["key"])
+
+    @staticmethod
+    def get_chat_key_by_uuid(uuid: UUID) -> bytes:
+        for chat in ChatsMixin.get_chats().values():
+            if chat["uuid"] == str(uuid):
+                return b85decode(chat["key"])
+        raise KeyError

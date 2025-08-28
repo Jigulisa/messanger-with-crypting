@@ -137,7 +137,7 @@ def grant_access(chat: str, user: str) -> None:
     data = {
         "chat_id": Settings.get_chat_uuid(chat),
         "user": user,
-        "key": Settings.get_chet_key(chat),
+        "key": Settings.get_chat_key(chat),
     }
     with suppress(RequestException):
         post(

@@ -16,6 +16,7 @@ class Chat(base.UUIDv7AuditBase):
 
 class Message(base.UUIDv7AuditBase):
     text: Mapped[str]
+    salt: Mapped[str]
     sent_time: Mapped[datetime]
 
     author_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))

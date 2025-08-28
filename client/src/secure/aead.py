@@ -1,4 +1,4 @@
-from base64 import b85encode
+from base64 import b85decode, b85encode
 from os import urandom
 
 from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
@@ -15,5 +15,5 @@ def encrypt(key: bytes, text: str) -> tuple[str, str]:
     ).decode(), b85encode(nonce).decode()
 
 
-def decrypt(key: bytes, text: bytes, nonce: bytes) -> str:
-    return ChaCha20Poly1305(key).decrypt(nonce, text, None).decode()
+def decrypt(key: bytes, text: str, nonce: str) -> str:
+    return ChaCha20Poly1305(key).decrypt(b85decode(nonce), b85decode(text), None).decode()

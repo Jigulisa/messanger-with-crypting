@@ -8,15 +8,18 @@ authors = [
 ]
 requires-python = ">=3.13, <3.14"
 dependencies = [
+    "cryptography",
     "dearpygui",
     "liboqs-python",
     "msgspec[toml]",
     "pydantic",
+    "torch",
+    "transformers",
     "websockets",
 ]
 
 [tool.uv.sources]
-liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }
+liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git", tag = "0.12.0" }
 
 [dependency-groups]
 dev = [
@@ -25,6 +28,5 @@ dev = [
 
 [tool.ruff]
 src = ["./src/"]
-extend-exclude = ["*.ipynb"]
 lint.select = ["ALL"]
-lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]
+lint.ignore = ["D10", "D203", "D212"]

@@ -15,6 +15,8 @@ class View(ResizeMixin):
     def resize(self, width: int, height: int, position: tuple[int, int]) -> None:
         super().resize(width, height, position)
         ViewName.CHAT.value.resize(width, height)
+        ViewName.HELP.value.resize(width, height)
+        ViewName.STORAGE.value.resize(width, height)
 
     def __init__(self) -> None:
         with window(
@@ -29,8 +31,12 @@ class View(ResizeMixin):
         self.show_view(ViewName.CHAT)
 
     def show_view(self, view_name: ViewName) -> None:
+        if view_name == ViewName.CHAT:
+            view_name.value.update_chat_list()
+
         for view in ViewName:
             hide_item(view.value.name)
+
         show_item(view_name.value.name)
 
     def create_views(self) -> None:

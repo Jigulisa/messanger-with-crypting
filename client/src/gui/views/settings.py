@@ -3,9 +3,12 @@ from typing import Self
 
 from dearpygui.dearpygui import (
     add_button,
+    add_checkbox,
     add_color_picker,
     add_file_extension,
+    add_input_int,
     add_input_text,
+    add_radio_button,
     add_text,
     file_dialog,
     get_value,
@@ -13,6 +16,7 @@ from dearpygui.dearpygui import (
     get_viewport_width,
     set_value,
     show_item,
+    window,
 )
 
 from gui.views.core import View
@@ -24,8 +28,10 @@ class Settings(View):
         return "settings"
 
     def create(self: Self) -> None:
+        add_text("Settings")
         self.create_appearance_set()
         self.create_roles_place()
+        self.fill_in_form()
 
     def create_appearance_set(self: Self) -> None:
         add_text("background image")
@@ -98,6 +104,37 @@ class Settings(View):
         color = get_value("for_panels_color")
         set_value("selected_panels_color", f"selected {color}")
 
-    def on_form(self: Self) -> None: ...
+    def on_form(self: Self) -> None:
+        with window(tag="form", width=700, label="Self Form"):
+            add_text("ФИО")
+            add_input_text()
+            add_text("Gender")
+            add_radio_button(items=["male", "female", "ламинат"], horizontal=True)
+            add_text("Age")
+            add_input_int()
+            add_text("Hobbies")
+            add_checkbox(label="voleyball")
+            add_checkbox(label="programming")
+            add_checkbox(label="ML")
+            add_checkbox(label="algorythms")
+            add_checkbox(label="rock music")
+            add_checkbox(label="drawing")
+            add_checkbox(label="art")
+            add_checkbox(label="manga")
+            add_checkbox(label="anime")
+            add_checkbox(label="politics")
+            add_checkbox(label="DIY")
+            add_checkbox(label="style")
+            add_checkbox(label="hairstyling")
+            add_checkbox(label="knitting")
+            add_checkbox(label="series")
+            add_checkbox(label="frontend")
+            add_checkbox(label="doing music")
+            add_checkbox(label="reading")
+            add_checkbox(label="other")
+
+            add_button(label="Save!", callback=self.on_form_saving)
 
     def cancel_callback(self: Self) -> None: ...
+
+    def on_form_saving(self: Self) -> None: ...

@@ -1,29 +1,46 @@
 from base64 import b85decode, b85encode
+from contextlib import suppress
 
-from secure.signature import generate_keypair
-from settings.file import FileMixin
+from secure.kem import generate_kem_keypair
+from secure.signature import generate_dsa_keypair
+from settings.storage import Storage
 
 
 class KeysMixin:
     @staticmethod
-    def get_private_key() -> bytes:
-        private_key = FileMixin.get_value("private_key")
+    def get_dsa_private_key() -> bytes:
+        with suppress(KeyError):
+            return b85decode(Storage[str].get_value("dsa_private_key"))
 
-        if private_key is not None:
-            return b85decode(private_key)
-
-        private_key, public_key = generate_keypair()
-        FileMixin.set_value("private_key", b85encode(private_key).decode())
-        FileMixin.set_value("public_key", b85encode(public_key).decode())
+        private_key, public_key = generate_dsa_keypair()
+        Storage[str].set_value("dsa_private_key", b85encode(private_key).decode())
+        Storage[str].set_value("dsa_public_key", b85encode(public_key).decode())
         return private_key
 
     @staticmethod
-    def get_public_key() -> str:
-        public_key = FileMixin.get_value("public_key")
+    def get_dsa_public_key() -> str:
+        with suppress(KeyError):
+            return Storage[str].get_value("dsa_public_key")
 
-        if public_key is not None:
-            return public_key
+        private_key, public_key = generate_dsa_keypair()
+        Storage[str].set_value("dsa_private_key", b85encode(private_key).decode())
+        return Storage[str].set_value("dsa_public_key", b85encode(public_key).decode())
 
-        private_key, public_key = generate_keypair()
-        FileMixin.set_value("private_key", b85encode(private_key).decode())
-        return FileMixin.set_value("public_key", b85encode(public_key).decode())
+    @staticmethod
+    def get_kem_private_key() -> bytes:
+        with suppress(KeyError):
+            return b85decode(Storage[str].get_value("kem_private_key"))
+
+        private_key, public_key = generate_kem_keypair()
+        Storage[str].set_value("kem_private_key", b85encode(private_key).decode())
+        Storage[str].set_value("kem_public_key", b85encode(public_key).decode())
+        return private_key
+
+    @staticmethod
+    def get_kem_public_key() -> str:
+        with suppress(KeyError):
+            return Storage[str].get_value("kem_public_key")
+
+        private_key, public_key = generate_kem_keypair()
+        Storage[str].set_value("kem_private_key", b85encode(private_key).decode())
+        return Storage[str].set_value("kem_public_key", b85encode(public_key).decode())

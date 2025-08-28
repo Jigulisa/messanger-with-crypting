@@ -8,13 +8,14 @@ authors = [
 ]
 requires-python = ">=3.13, <3.14"
 dependencies = [
+    "aiosqlite",
     "liboqs-python",
     "litestar[pydantic,redis,sqlalchemy]",
     "uvicorn[standard]",
 ]
 
 [tool.uv.sources]
-liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git" }
+liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git", tag = "0.12.0" }
 
 [dependency-groups]
 dev = [
@@ -22,6 +23,6 @@ dev = [
 ]
 
 [tool.ruff]
-src = ["./main.py"]
+src = ["./src/"]
 lint.select = ["ALL"]
-lint.ignore = ["D100", "D101", "D102", "D103", "D104", "D106", "D107", "D203", "D212"]
+lint.ignore = ["D10", "D203", "D212"]

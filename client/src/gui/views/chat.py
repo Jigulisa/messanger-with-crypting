@@ -1,14 +1,18 @@
 from datetime import UTC, datetime
 from queue import Queue
 from typing import Self
+from uuid import UUID
 
 from dearpygui.dearpygui import (
     add_button,
+    add_child_window,
     add_group,
     add_input_text,
     add_text,
+    add_window,
     child_window,
     delete_item,
+    get_item_width,
     get_value,
     get_y_scroll_max,
     set_item_height,
@@ -16,10 +20,14 @@ from dearpygui.dearpygui import (
     set_item_width,
     set_value,
     set_y_scroll,
+    window,
 )
 
 from gui.views.core import View
-from net.message_struct import ReceivedPrivateMessage, SentPrivateMessage
+from net.chat import create_chat, grant_access
+from net.dto import MessageDTO
+from secure.aead import decrypt, encrypt, generate_key
+from secure.kem import encap_chat_key
 from settings import Settings
 
 
@@ -33,9 +41,9 @@ class Chat(View):
         return "chat"
 
     def resize(self: Self, width: int, height: int) -> None:
-        set_item_width("chats_list", width // 4)
-        set_item_height("chats_list", height)
-        set_item_pos("chats_list", [0, 0])
+        set_item_width(self.chat_list_window, width // 4)
+        set_item_height(self.chat_list_window, height)
+        set_item_pos(self.chat_list_window, [0, 0])
 
         set_item_width("personal_zone", width - width // 4)
         set_item_height("personal_zone", height // 10)
@@ -49,6 +57,8 @@ class Chat(View):
         set_item_height("text_place", height // 10)
         set_item_pos("text_place", [width // 4, height - height // 10])
 
+        set_item_width("new_chat_name", get_item_width(self.chat_list_window) - 85)
+
     def create(self: Self) -> None:
         self.create_list()
         self.create_personal_zone()
@@ -56,18 +66,57 @@ class Chat(View):
         self.create_text_zone()
 
     def create_list(self: Self) -> None:
-        with child_window(label="Chats", tag="chats_list"):
-            chats = ("andy", "class chat", "dad", "barotrauma")
-            for chat in chats:
-                add_button(
-                    label=chat[:6],
-                    tag=chat,
-                    callback=lambda *, sender=chat: self.callback(sender),
-                )
+        self.chat_list_window = add_child_window(label="Chats")
+        self.update_chat_list()
+
+    def update_chat_list(self) -> None:
+        delete_item(self.chat_list_window, children_only=True)
+        group_id = add_group(parent=self.chat_list_window, horizontal=True)
+        add_input_text(
+            default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+            tag="new_chat_name",
+            width=get_item_width(self.chat_list_window) - 85,
+            parent=group_id,
+        )
+        add_button(
+            label="new chat",
+            callback=lambda: self.add_new_chat(get_value("new_chat_name")),
+            parent=group_id,
+        )
+        chats = Settings.get_chats()
+        for uuid, chat in chats.items():
+            add_button(
+                label=chat["name"],
+                tag=uuid,
+                callback=lambda *, selected_chat=uuid: self.callback(selected_chat),
+                parent=self.chat_list_window,
+            )
 
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
-            add_text("no1", tag="chat_name")
+            group_id = add_group(horizontal=True)
+
+            add_text("no1", tag="chat_name", parent=group_id)
+            add_button(label="+", parent=group_id, callback=self.on_adding_user)
+
+    def on_adding_user(self) -> None:
+        self.add_user_window = add_window(
+            label="new participant",
+            width=300,
+            height=250,
+        )
+        self.user_id = add_input_text(
+            default_value="new user",
+            parent=self.add_user_window,
+        )
+        add_button(
+            label="ok",
+            callback=lambda: self.on_new_user(get_value(self.user_id)),
+            parent=self.add_user_window,
+        )
+
+    def on_new_user(self, new_user: str) -> None:
+        grant_access(self.current_chat, new_user)
 
     def create_chat_place(self: Self) -> None:
         with child_window(label="Messages", tag="chat_place", border=False):
@@ -75,27 +124,69 @@ class Chat(View):
 
     def create_text_zone(self: Self) -> None:
         with child_window(label="text", tag="text_place"):
-            add_input_text(default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆", tag="input")
-            add_button(label="send", callback=lambda: self.on_sending())
+            group_id = add_group(horizontal=True)
+            add_input_text(
+                default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+                tag="input",
+                width=get_item_width("text_place") - 70,
+                parent=group_id,
+            )
+            add_button(
+                label="send",
+                callback=lambda: self.on_sending(),
+                parent=group_id,
+            )
 
     def callback(self: Self, selected_chat: str) -> None:
         delete_item("message_group", children_only=True)
-        set_value("chat_name", selected_chat[:6])
+        set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat
 
     def on_sending(self: Self) -> None:
-        inp = get_value("input")
+        text = get_value("input")
         set_value("input", "")
+        encrypted_text, salt = encrypt(Settings.get_chat_key(self.current_chat), text)
         self.queue_send.put(
-            SentPrivateMessage(
-                message=inp,
+            MessageDTO(
+                text=encrypted_text,
+                salt=salt,
                 sent_time=datetime.now(UTC),
-                author=Settings.get_public_key(),
-                receive_id=self.current_chat,
+                author=Settings.get_dsa_public_key(),
+                chat_id=UUID(self.current_chat),
                 signature="",
             ),
         )
 
-    def on_receiving(self: Self, message: ReceivedPrivateMessage) -> None:
-        add_text(f"{message.author[:6]}: {message.message}", parent="message_group")
+    def on_receiving(self: Self, message: MessageDTO) -> None:
+        message.text = decrypt(
+            Settings.get_chat_key(message.chat_id),
+            message.text,
+            message.salt,
+        )
+        if not message.is_spam:
+            add_text(
+                f"{message.author[:6]}: {message.text}",
+                parent="message_group",
+                wrap=get_item_width("chat_place"),
+            )
+        else:
+            add_button(
+                label="SPAM",
+                callback=lambda data=message.text: self.on_spam(data),
+            )
         set_y_scroll("chat_place", get_y_scroll_max("chat_place") + 25)
+
+    def on_spam(self, text: str) -> None:
+        with window(label="SPAM", width=350, height=450, no_resize=True):
+            add_text(text, wrap=430)
+
+    def add_new_chat(self, name: str) -> None:
+        key = generate_key()
+        secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
+            Settings.get_kem_public_key(),
+            key,
+        )
+        uuid = create_chat(secret, secret_salt, encrypted_key, key_salt, name)
+        if uuid is not None:
+            Settings.add_chat(name, uuid, key)
+        self.update_chat_list()

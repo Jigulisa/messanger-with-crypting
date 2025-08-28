@@ -1,7 +1,7 @@
 import asyncio
 import threading
 from asyncio import gather, run, sleep
-from base64 import b85decode
+from base64 import b85decode, b85encode
 from contextlib import suppress
 from http import HTTPStatus
 from queue import Empty, Queue
@@ -17,7 +17,7 @@ from net.dto import AccessChatDTO, MessageDTO
 from net.utils import get_auth_headers
 from secure.aead import decrypt
 from secure.kdf import get_n_bytes_password
-from secure.kem import decap_secret
+from secure.kem import decap_secret, encap_chat_key
 from secure.signature import sign, verify
 from settings import Settings
 
@@ -139,10 +139,17 @@ def create_chat(
 
 
 def grant_access(chat_uuid: str, user: str) -> None:
+    secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
+        user,
+        b85encode(Settings.get_chat_key(chat_uuid)).decode(),
+    )
     data = {
         "chat_id": chat_uuid,
         "user": user,
-        "key": Settings.get_chat_key(chat_uuid),
+        "secret": secret,
+        "secret_salt": secret_salt,
+        "key": encrypted_key,
+        "key_salt": key_salt,
     }
     with suppress(RequestException):
         post(

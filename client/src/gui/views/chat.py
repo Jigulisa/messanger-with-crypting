@@ -26,8 +26,7 @@ from gui.views.core import View
 from net.chat import create_chat, grant_access
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
-from secure.kdf import get_n_bytes_password
-from secure.kem import encap_secret
+from secure.kem import encap_chat_key
 from settings import Settings
 
 
@@ -176,11 +175,12 @@ class Chat(View):
             add_text(text, wrap=430)
 
     def add_new_chat(self, name: str) -> None:
-        ciphertext, secret = encap_secret(Settings.get_kem_public_key())
-        password, secret_salt = get_n_bytes_password(secret, 32)
         key = generate_key()
-        encrypted_key, key_salt = encrypt(password, key)
-        uuid = create_chat(ciphertext, secret_salt, encrypted_key, key_salt, name)
+        secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
+            Settings.get_kem_public_key(),
+            key,
+        )
+        uuid = create_chat(secret, secret_salt, encrypted_key, key_salt, name)
         if uuid is not None:
             Settings.add_chat(name, uuid, key)
         self.update_chat_list()

@@ -139,7 +139,11 @@ class Chat(View):
         )
 
     def on_receiving(self: Self, message: MessageDTO) -> None:
-        message.text = decrypt(Settings.get_chat_key_by_uuid(message.chat_id), message.text, message.salt)
+        message.text = decrypt(
+            Settings.get_chat_key_by_uuid(message.chat_id),
+            message.text,
+            message.salt,
+        )
         if not message.is_spam:
             add_text(
                 f"{message.author[:6]}: {message.text}",

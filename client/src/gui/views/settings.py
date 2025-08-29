@@ -79,7 +79,12 @@ class Settings(View):
     def new_username_place(self: Self) -> None:
         self.new_username = add_input_text(default_value="your new username")
         add_button(label="ok", callback=self.on_new_username)
+        self.is_spam_tracker_on = add_radio_button(label="Spam tracker",
+                                                   callback=self.spam_tracker_switch)
 
+    def spam_tracker_switch(self) -> None:
+        if get_value(self.is_spam_tracker_on):
+            pass
     def on_new_username(self) -> None:
         pass
     def fill_in_form(self: Self) -> None:

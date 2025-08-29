@@ -134,8 +134,20 @@ class Chat(View):
             height=400,
             pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
         )
-        new_name = add_input_text(default_value="new name")
-        add_button(label="ok", parent=current_window, callback=lambda: ...)
+        self.new_chat_name = add_input_text(default_value="new chat name",
+                                            parent=current_window)
+        add_button(
+            label="ok",
+            parent=current_window,
+            callback=self.on_chat_renaming)
+        add_button(
+            label="close",
+            parent=current_window,
+            callback=lambda: delete_item(current_window))
+
+    def on_chat_renaming(self) -> None:
+        name = get_value(self.new_chat_name)
+        chat = self.current_chat
 
     def on_new_desc(self) -> None:
         pass
@@ -179,6 +191,7 @@ class Chat(View):
             )
 
     def callback(self: Self, selected_chat: str) -> None:
+        print(1)
         delete_item("message_group", children_only=True)
         set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat

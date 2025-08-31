@@ -10,12 +10,11 @@ def get_n_bytes_password(
     salt: bytes | None = None,
 ) -> tuple[bytes, str]:
     salt = salt or urandom(16)
-    lanes = 4
     kdf = Argon2id(
         salt=salt,
         length=n,
-        iterations=1,
-        lanes=lanes,
-        memory_cost=lanes * 8 * 1024,
+        iterations=8,
+        lanes=8,
+        memory_cost=256 * 1024,
     )
     return kdf.derive(password), b85encode(salt).decode()

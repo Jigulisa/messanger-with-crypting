@@ -12,6 +12,7 @@ dependencies = [
     "dearpygui",
     "liboqs-python",
     "msgspec[toml]",
+    "orjson",
     "pydantic",
     "torch",
     "transformers",

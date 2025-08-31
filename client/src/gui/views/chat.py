@@ -31,7 +31,6 @@ from gui.views.core import View
 from net.chat import create_chat, grant_access
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
-from secure.kem import encap_chat_key
 from settings import Settings
 
 
@@ -114,18 +113,22 @@ class Chat(View):
             width=250,
             height=400,
             pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
-            )
-        add_button(label="edit chat name",
-                   parent=self.options_window,
-                   width=245,
-                   callback=self.on_new_chat_name)
-        add_button(label="edit description",
-                   parent=self.options_window,
-                   width=245,
-                   callback=self.on_new_desc)
+        )
+        add_button(
+            label="edit chat name",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_chat_name,
+        )
+        add_button(
+            label="edit description",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_desc,
+        )
 
     def on_new_chat_name(self) -> None:
-        hide_item(self.options_window) # pyright: ignore[reportArgumentType]
+        hide_item(self.options_window)  # pyright: ignore[reportArgumentType]
         current_window = add_window(
             no_resize=True,
             no_move=True,
@@ -134,16 +137,16 @@ class Chat(View):
             height=400,
             pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
         )
-        self.new_chat_name = add_input_text(default_value="new chat name",
-                                            parent=current_window)
-        add_button(
-            label="ok",
+        self.new_chat_name = add_input_text(
+            default_value="new chat name",
             parent=current_window,
-            callback=self.on_chat_renaming)
+        )
+        add_button(label="ok", parent=current_window, callback=self.on_chat_renaming)
         add_button(
             label="close",
             parent=current_window,
-            callback=lambda: delete_item(current_window))
+            callback=lambda: delete_item(current_window),
+        )
 
     def on_chat_renaming(self) -> None:
         name = get_value(self.new_chat_name)
@@ -205,7 +208,7 @@ class Chat(View):
                 text=encrypted_text,
                 salt=salt,
                 sent_time=datetime.now(UTC),
-                author=Settings.get_dsa_public_key(),
+                author=Settings.get_sig_key().public_key,
                 chat_id=UUID(self.current_chat),
                 signature="",
             ),
@@ -236,9 +239,11 @@ class Chat(View):
 
     def add_new_chat(self, name: str) -> None:
         key = generate_key()
-        secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
-            Settings.get_kem_public_key(),
-            key,
+        secret, secret_salt, encrypted_key, key_salt = (
+            Settings.get_kem_key().encap_chat_key(
+                Settings.get_kem_key().public_key,
+                key,
+            )
         )
         uuid = create_chat(secret, secret_salt, encrypted_key, key_salt, name)
         if uuid is not None:

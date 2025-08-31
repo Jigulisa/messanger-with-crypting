@@ -7,12 +7,13 @@ environ["OQS_INSTALL_PATH"] = str(
 
 from time import sleep
 
-from gui.app import Messenger
+from gui.app import Messenger, SignIn
 from net.chat import WebSocketClient, get_all_chats
+from settings.storage import Storage
 
 
 def main() -> None:
-    # password = SignIn().password
+    Storage.password = SignIn().password
 
     websocket = WebSocketClient()
     websocket.start()

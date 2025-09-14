@@ -21,6 +21,21 @@ def get_file_names() -> list[str] | None:
 
     return None
 
+def upload_file(file: bytes, name: str) -> str | None:
+    param = {"file": file, "name": name}
+    try:
+        response = post(
+            Settings.get_server_storage_url("/upload"),
+            data=param,
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return "Error. Try Again."
+
+    if response.status_code == HTTPStatus.OK:
+        return "File is uploaded."
+    return None
 
 def download_file(name: str) -> bytes | None:
     param = {"name": name}

@@ -1,9 +1,10 @@
 from os import environ
 from pathlib import Path
+from models.summarize import summarizer
 
-environ["OQS_INSTALL_PATH"] = str(
-    Path(__file__).resolve().parent.parent / "libs" / "oqs",
-)
+# environ["OQS_INSTALL_PATH"] = str(
+#     Path(__file__).resolve().parent.parent / "libs" / "oqs",
+# )
 
 from time import sleep
 
@@ -23,6 +24,6 @@ def main() -> None:
 
     Messenger(1280, 720, queue_send, queue_receive, websocket.stop).run()
 
-
+print(summarizer("ыта: привет. у меня родился сын. удч: привет. я рада за тебя. а сколько ему лет? ыта: ты тупая?"))
 if __name__ == "__main__":
     main()

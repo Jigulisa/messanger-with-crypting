@@ -15,7 +15,7 @@ dependencies = [
     "orjson",
     "pydantic",
     "torch",
-    "transformers",
+    "transformers==4.45.0",
     "websockets",
 ]
 

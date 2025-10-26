@@ -25,6 +25,8 @@ from dearpygui.dearpygui import (
     set_y_scroll,
     show_item,
     window,
+    does_item_exist,
+    get_item_label,
 )
 
 from gui.views.core import View
@@ -98,10 +100,51 @@ class Chat(View):
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
             group_id = add_group(horizontal=True)
-            add_text("no1", tag="chat_name", parent=group_id)
-            add_button(label="+", parent=group_id, callback=self.on_adding_user)
-            self.options_window = None
-            add_button(label="...", parent=group_id, callback=self.on_three_dots)
+            add_text("", tag="chat_name", parent=group_id)
+            add_button(label="...", parent=group_id, callback=lambda:self.options)
+
+    def options(self) -> None:
+        if does_item_exist("options_window"):
+            delete_item("options_window")
+        options_window = window(
+            tag="options_window",
+            width=300,
+            height=250,
+            no_title_bar=True,
+            no_resize=True,
+        )
+        with options_window:
+            file_name = str(get_item_label(self.current_chat))
+            add_text(default_value=file_name)
+
+            add_button(label="Add user", callback=self.on_adding_user)
+            add_button(label="Report", callback=self.on_report)
+            add_button(
+                label="close",
+                callback=lambda: delete_item("options_window"),
+                width=285,
+                height=30,
+            )
+
+    def on_report(self) -> None:
+        chat_name = self.current_chat
+        if does_item_exist("report_comment"):
+            delete_item("report_comment")
+        report_comment = window(
+            tag="report_comment",
+            width=300,
+            height=300,
+            no_title_bar=True,
+            no_resize=True,
+        )
+        with report_comment:
+            file_name = str(get_item_label(self.current_chat))
+            add_text(default_value="something else?")
+
+            comment = add_input_text()
+            add_button(label="Ok", callback=lambda: delete_item("report_comment"))
+            ...
+
 
     def on_three_dots(self) -> None:
         if self.options_window:

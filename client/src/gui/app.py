@@ -40,7 +40,7 @@ class SignIn:
         create_context()
 
         create_viewport(width=300, height=200)
-        self.password = None
+        self.password = ""
         self.main_window = add_window(
             label="Cryptogram",
             width=290,
@@ -71,7 +71,7 @@ class SignIn:
         destroy_context()
 
     def on_password(self) -> None:
-        self.password = get_value(self.password_input)
+        self.password: str = get_value(self.password_input)
         stop_dearpygui()
 
 
@@ -98,8 +98,8 @@ class Messenger:
             title="Cryptogramm",
             width=width,
             height=height,
-            min_width=0,
-            min_height=0,
+            min_width=260,
+            min_height=400,
         )
         set_exit_callback(exit_callback)
         set_viewport_resize_callback(self.resize)

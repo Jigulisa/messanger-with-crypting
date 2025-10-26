@@ -1,13 +1,16 @@
 from dearpygui.dearpygui import (
     add_button,
+    add_file_extension,
     add_group,
     add_input_text,
     add_text,
     delete_item,
     does_item_exist,
+    file_dialog,
     get_item_children,
     get_item_label,
     get_value,
+    show_item,
     window,
 )
 
@@ -18,6 +21,7 @@ from net.storage import (
     get_file_names,
     get_file_properties,
     rename,
+    upload_file,
 )
 from settings import storage
 
@@ -28,7 +32,9 @@ class Storage(View):
         return "storage"
 
     def create(self) -> None:
-        add_text("Storage")
+        group_id = add_group(parent=self.name, horizontal=True)
+        add_text("Storage", parent=group_id)
+        add_button(label="+", parent=group_id, callback=self.on_new_file)
         self.file_names = get_file_names()
         self.file_names = [
             "1",
@@ -54,6 +60,46 @@ class Storage(View):
             "21",
             "22",
         ]
+
+    def on_new_file(self) -> None:
+        if not does_item_exist("new_file_fd"):
+            with file_dialog(
+                directory_selector=False,
+                show=True,
+                callback=self.on_chosen_file,
+                tag="new_file_fd",
+                width=700,
+                height=400,
+            ):
+                add_file_extension(".*", color=(255, 255, 255, 255))
+
+                add_file_extension(".jpg", color=(120, 200, 120, 255))
+                add_file_extension(".jpeg", color=(120, 200, 120, 255))
+                add_file_extension(".png", color=(120, 200, 120, 255))
+                add_file_extension(".bmp", color=(120, 200, 120, 255))
+                add_file_extension(".gif", color=(120, 200, 120, 255))
+                add_file_extension(".tiff", color=(120, 200, 120, 255))
+                add_file_extension(".webp", color=(120, 200, 120, 255))
+
+                add_file_extension(".mp4", color=(200, 120, 120, 255))
+                add_file_extension(".avi", color=(200, 120, 120, 255))
+                add_file_extension(".mkv", color=(200, 120, 120, 255))
+                add_file_extension(".mov", color=(200, 120, 120, 255))
+                add_file_extension(".wmv", color=(200, 120, 120, 255))
+                add_file_extension(".flv", color=(200, 120, 120, 255))
+
+                add_file_extension(".mp3", color=(120, 120, 200, 255))
+                add_file_extension(".wav", color=(120, 120, 200, 255))
+                add_file_extension(".flac", color=(120, 120, 200, 255))
+                add_file_extension(".ogg", color=(120, 120, 200, 255))
+                add_file_extension(".aac", color=(120, 120, 200, 255))
+        else:
+            show_item("new_file_fd")
+
+    def on_chosen_file(self, filepath: str) -> None:
+        with open(filepath, "rb") as f:
+            file_bytes = f.read()
+            upload_file(file_bytes, filepath.split("/")[-1])
 
     def on_tapping(self, name: str) -> None:
         if does_item_exist(f"second_window_{name}"):
@@ -110,7 +156,9 @@ class Storage(View):
 
     def resize(self, width: int, height: int) -> None:
         delete_item("storage", children_only=True)
-        add_text("Storage", parent="storage")
+        group_id = add_group(parent=self.name, horizontal=True)
+        add_text("Storage", parent=group_id)
+        add_button(label="+", parent=group_id, callback=self.on_new_file)
         if self.file_names:
             row_size = width // 110
             if row_size == 0:
@@ -138,10 +186,10 @@ class Storage(View):
             add_input_text(label="Enter new name", tag="new_name")
             add_button(
                 label="Ok",
-                callback=lambda data=file_name: self.button_callback(data),
+                callback=lambda data=file_name: self.getting_new_name(data),
             )
 
-    def button_callback(self, old: str) -> None:
+    def getting_new_name(self, old: str) -> None:
         new = get_value("new_name")
         self.make_notification(rename(old, new))
 

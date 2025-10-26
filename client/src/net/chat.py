@@ -17,8 +17,6 @@ from net.dto import AccessChatDTO, MessageDTO
 from net.utils import get_auth_headers
 from secure.aead import decrypt
 from secure.kdf import get_n_bytes_password
-from secure.kem import decap_secret, encap_chat_key
-from secure.signature import sign, verify
 from settings import Settings
 
 
@@ -65,9 +63,8 @@ class WebSocketClient(Thread):
                 await sleep(0.01)
                 continue
 
-            message.signature = sign(
+            message.signature = Settings.get_sig_key().sign(
                 message.model_dump_json(exclude={"signature"}).encode(),
-                Settings.get_dsa_private_key(),
             )
             message_json = message.model_dump_json()
             try:
@@ -88,7 +85,7 @@ class WebSocketClient(Thread):
             except ValidationError:
                 continue
 
-            is_valid = verify(
+            is_valid = Settings.get_sig_key().verify(
                 verified_message.model_dump_json(
                     exclude={"signature"},
                 ).encode(),
@@ -163,9 +160,11 @@ def grant_access(chat_uuid: str, user: str) -> None:
     if user_kem_public_key is None:
         return
 
-    secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
-        user_kem_public_key,
-        b85encode(Settings.get_chat_key(chat_uuid)).decode(),
+    secret, secret_salt, encrypted_key, key_salt = (
+        Settings.get_kem_key().encap_chat_key(
+            user_kem_public_key,
+            b85encode(Settings.get_chat_key(chat_uuid)).decode(),
+        )
     )
     data = {
         "chat_id": chat_uuid,
@@ -207,7 +206,7 @@ def get_all_chats() -> None:
 
     for chat in access_list:
         access = AccessChatDTO.model_validate(chat)
-        secret = decap_secret(access.secret, Settings.get_kem_private_key())
+        secret = Settings.get_kem_key().decap_secret(access.secret)
         password, _ = get_n_bytes_password(secret, 32, b85decode(access.secret_salt))
         key = decrypt(password, access.key, access.key_salt)
         uuid = str(access.chat_id)

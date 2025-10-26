@@ -12,14 +12,20 @@ from dearpygui.dearpygui import (
     add_window,
     child_window,
     delete_item,
+    does_item_exist,
+    get_item_label,
     get_item_width,
     get_value,
+    get_viewport_client_height,
+    get_viewport_client_width,
     get_y_scroll_max,
+    hide_item,
     set_item_height,
     set_item_pos,
     set_item_width,
     set_value,
     set_y_scroll,
+    show_item,
     window,
 )
 
@@ -27,7 +33,6 @@ from gui.views.core import View
 from net.chat import create_chat, grant_access
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
-from secure.kem import encap_chat_key
 from settings import Settings
 
 
@@ -73,7 +78,7 @@ class Chat(View):
         delete_item(self.chat_list_window, children_only=True)
         group_id = add_group(parent=self.chat_list_window, horizontal=True)
         add_input_text(
-            default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+            default_value="новый чат",
             tag="new_chat_name",
             width=get_item_width(self.chat_list_window) - 85,
             parent=group_id,
@@ -95,9 +100,101 @@ class Chat(View):
     def create_personal_zone(self: Self) -> None:
         with child_window(tag="personal_zone"):
             group_id = add_group(horizontal=True)
+            add_text("", tag="chat_name", parent=group_id)
+            add_button(label="...", parent=group_id, callback=lambda: self.options)
 
-            add_text("no1", tag="chat_name", parent=group_id)
-            add_button(label="+", parent=group_id, callback=self.on_adding_user)
+    def options(self) -> None:
+        if does_item_exist("options_window"):
+            delete_item("options_window")
+        options_window = window(
+            tag="options_window",
+            width=300,
+            height=250,
+            no_title_bar=True,
+            no_resize=True,
+        )
+        with options_window:
+            file_name = str(get_item_label(self.current_chat))
+            add_text(default_value=file_name)
+
+            add_button(label="Add user", callback=self.on_adding_user)
+            add_button(label="Report", callback=self.on_report)
+            add_button(
+                label="close",
+                callback=lambda: delete_item("options_window"),
+                width=285,
+                height=30,
+            )
+
+    def on_report(self) -> None:
+        chat_name = self.current_chat
+        if does_item_exist("report_comment"):
+            delete_item("report_comment")
+        report_comment = window(
+            tag="report_comment",
+            width=300,
+            height=300,
+            no_title_bar=True,
+            no_resize=True,
+        )
+        with report_comment:
+            file_name = str(get_item_label(self.current_chat))
+            add_text(default_value="something else?")
+
+            comment = add_input_text()
+            add_button(label="Ok", callback=lambda: delete_item("report_comment"))
+
+    def on_three_dots(self) -> None:
+        if self.options_window:
+            show_item(self.options_window)
+        self.options_window = add_window(
+            no_resize=True,
+            no_move=True,
+            no_title_bar=True,
+            width=250,
+            height=400,
+            pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
+        )
+        add_button(
+            label="edit chat name",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_chat_name,
+        )
+        add_button(
+            label="edit description",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_desc,
+        )
+
+    def on_new_chat_name(self) -> None:
+        hide_item(self.options_window)  # pyright: ignore[reportArgumentType]
+        current_window = add_window(
+            no_resize=True,
+            no_move=True,
+            no_title_bar=True,
+            width=250,
+            height=400,
+            pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
+        )
+        self.new_chat_name = add_input_text(
+            default_value="new chat name",
+            parent=current_window,
+        )
+        add_button(label="ok", parent=current_window, callback=self.on_chat_renaming)
+        add_button(
+            label="close",
+            parent=current_window,
+            callback=lambda: delete_item(current_window),
+        )
+
+    def on_chat_renaming(self) -> None:
+        name = get_value(self.new_chat_name)
+        chat = self.current_chat
+
+    def on_new_desc(self) -> None:
+        pass
 
     def on_adding_user(self) -> None:
         self.add_user_window = add_window(
@@ -126,7 +223,7 @@ class Chat(View):
         with child_window(label="text", tag="text_place"):
             group_id = add_group(horizontal=True)
             add_input_text(
-                default_value="☆*:.｡.o(≧▽≦)o.｡.:*☆",
+                default_value="ляляля",
                 tag="input",
                 width=get_item_width("text_place") - 70,
                 parent=group_id,
@@ -138,6 +235,7 @@ class Chat(View):
             )
 
     def callback(self: Self, selected_chat: str) -> None:
+        print(1)
         delete_item("message_group", children_only=True)
         set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat
@@ -151,7 +249,7 @@ class Chat(View):
                 text=encrypted_text,
                 salt=salt,
                 sent_time=datetime.now(UTC),
-                author=Settings.get_dsa_public_key(),
+                author=Settings.get_sig_key().public_key,
                 chat_id=UUID(self.current_chat),
                 signature="",
             ),
@@ -182,9 +280,11 @@ class Chat(View):
 
     def add_new_chat(self, name: str) -> None:
         key = generate_key()
-        secret, secret_salt, encrypted_key, key_salt = encap_chat_key(
-            Settings.get_kem_public_key(),
-            key,
+        secret, secret_salt, encrypted_key, key_salt = (
+            Settings.get_kem_key().encap_chat_key(
+                Settings.get_kem_key().public_key,
+                key,
+            )
         )
         uuid = create_chat(secret, secret_salt, encrypted_key, key_salt, name)
         if uuid is not None:

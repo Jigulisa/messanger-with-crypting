@@ -60,6 +60,7 @@ class Storage(View):
             "21",
             "22",
         ]
+
     def on_new_file(self) -> None:
         if not does_item_exist("new_file_fd"):
             with file_dialog(
@@ -95,10 +96,11 @@ class Storage(View):
         else:
             show_item("new_file_fd")
 
-    def on_chosen_file(self, filepath:str) -> None:
+    def on_chosen_file(self, filepath: str) -> None:
         with open(filepath, "rb") as f:
             file_bytes = f.read()
             upload_file(file_bytes, filepath.split("/")[-1])
+
     def on_tapping(self, name: str) -> None:
         if does_item_exist(f"second_window_{name}"):
             delete_item(f"second_window_{name}")

@@ -12,6 +12,8 @@ from dearpygui.dearpygui import (
     add_window,
     child_window,
     delete_item,
+    does_item_exist,
+    get_item_label,
     get_item_width,
     get_value,
     get_viewport_client_height,
@@ -25,8 +27,6 @@ from dearpygui.dearpygui import (
     set_y_scroll,
     show_item,
     window,
-    does_item_exist,
-    get_item_label,
 )
 
 from gui.views.core import View
@@ -101,7 +101,7 @@ class Chat(View):
         with child_window(tag="personal_zone"):
             group_id = add_group(horizontal=True)
             add_text("", tag="chat_name", parent=group_id)
-            add_button(label="...", parent=group_id, callback=lambda:self.options)
+            add_button(label="...", parent=group_id, callback=lambda: self.options)
 
     def options(self) -> None:
         if does_item_exist("options_window"):
@@ -143,8 +143,6 @@ class Chat(View):
 
             comment = add_input_text()
             add_button(label="Ok", callback=lambda: delete_item("report_comment"))
-            ...
-
 
     def on_three_dots(self) -> None:
         if self.options_window:

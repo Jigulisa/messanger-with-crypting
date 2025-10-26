@@ -21,6 +21,7 @@ def get_file_names() -> list[str] | None:
 
     return None
 
+
 def upload_file(file: bytes, name: str) -> str | None:
     param = {"file": file, "name": name}
     try:
@@ -36,6 +37,7 @@ def upload_file(file: bytes, name: str) -> str | None:
     if response.status_code == HTTPStatus.OK:
         return "File is uploaded."
     return None
+
 
 def download_file(name: str) -> bytes | None:
     param = {"name": name}

@@ -1,3 +1,10 @@
+from os import environ
+from pathlib import Path
+
+environ["OQS_INSTALL_PATH"] = str(
+    Path(__file__).resolve().parent.parent / "libs" / "oqs",
+)
+
 from typing import Self
 
 from litestar import Litestar

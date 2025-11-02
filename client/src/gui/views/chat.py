@@ -28,12 +28,14 @@ from dearpygui.dearpygui import (
     show_item,
     window,
 )
+from orjson import dumps
 
 from gui.views.core import View
-from net.chat import create_chat, grant_access
+from net.chat import create_chat, grant_access, get_all_messages
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
 from settings import Settings
+from settings.storage import Storage
 
 
 class Chat(View):
@@ -101,30 +103,43 @@ class Chat(View):
         with child_window(tag="personal_zone"):
             group_id = add_group(horizontal=True)
             add_text("", tag="chat_name", parent=group_id)
-            add_button(label="...", parent=group_id, callback=lambda: self.options)
+            add_button(label="...", parent=group_id, callback=lambda: self.options())
 
     def options(self) -> None:
         if does_item_exist("options_window"):
             delete_item("options_window")
-        options_window = window(
+        self.options_window = add_window(
             tag="options_window",
             width=300,
             height=250,
             no_title_bar=True,
             no_resize=True,
         )
-        with options_window:
-            file_name = str(get_item_label(self.current_chat))
-            add_text(default_value=file_name)
+        file_name = str(get_item_label(self.current_chat))
+        add_text(parent=self.options_window, default_value=file_name)
 
-            add_button(label="Add user", callback=self.on_adding_user)
-            add_button(label="Report", callback=self.on_report)
-            add_button(
-                label="close",
-                callback=lambda: delete_item("options_window"),
-                width=285,
-                height=30,
-            )
+        add_button(parent=self.options_window, label="Add user", callback=self.on_adding_user)
+        add_button(parent=self.options_window, label="Report", callback=self.on_report)
+        add_button(
+            label="close",
+            callback=lambda: delete_item("options_window"),
+            width=285,
+            height=30,
+            parent=self.options_window,
+        )
+        add_button(
+            label="edit chat name",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_chat_name,
+        )
+        add_button(
+            label="edit description",
+            parent=self.options_window,
+            width=245,
+            callback=self.on_new_desc,
+        )
+        add_button(parent=self.options_window, label="export", callback=lambda: self.on_export_pressed())
 
     def on_report(self) -> None:
         chat_name = self.current_chat
@@ -144,29 +159,6 @@ class Chat(View):
             comment = add_input_text()
             add_button(label="Ok", callback=lambda: delete_item("report_comment"))
 
-    def on_three_dots(self) -> None:
-        if self.options_window:
-            show_item(self.options_window)
-        self.options_window = add_window(
-            no_resize=True,
-            no_move=True,
-            no_title_bar=True,
-            width=250,
-            height=400,
-            pos=[get_viewport_client_width() - 260, get_viewport_client_height() - 410],
-        )
-        add_button(
-            label="edit chat name",
-            parent=self.options_window,
-            width=245,
-            callback=self.on_new_chat_name,
-        )
-        add_button(
-            label="edit description",
-            parent=self.options_window,
-            width=245,
-            callback=self.on_new_desc,
-        )
 
     def on_new_chat_name(self) -> None:
         hide_item(self.options_window)  # pyright: ignore[reportArgumentType]
@@ -211,6 +203,17 @@ class Chat(View):
             callback=lambda: self.on_new_user(get_value(self.user_id)),
             parent=self.add_user_window,
         )
+
+    def on_export_pressed(self) -> None:
+        messages = get_all_messages(self.current_chat)
+        if messages is None:
+            return
+        data = dumps([message.model_dump() for message in messages])
+        path = Storage.base_dir / "exported-chats"
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+        with (path / f"{self.current_chat}.json").open("wb") as file:
+            file.write(data)
 
     def on_new_user(self, new_user: str) -> None:
         grant_access(self.current_chat, new_user)

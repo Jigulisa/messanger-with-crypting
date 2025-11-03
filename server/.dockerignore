@@ -1,0 +1,10 @@
+**/__pycache__
+**/.venv
+**/libs
+**/.ruff_cache
+**/.idea
+**/.vscode
+
+**/*.lock
+**/*.sqlite
+**/*.md

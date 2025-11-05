@@ -216,3 +216,19 @@ def get_all_chats() -> None:
         }
 
     Settings.set_chats(chats)
+
+
+def get_all_messages(chat_uuid: str) -> list[MessageDTO] | None:
+    try:
+        response = get(
+            Settings.get_server_chat_url(f"/{chat_uuid}"),
+            timeout=10,
+            headers=get_auth_headers(),
+        )
+    except RequestException:
+        return None
+
+    if response.status_code != HTTPStatus.OK:
+        return None
+
+    return [MessageDTO.model_validate(message) for message in response.json()]

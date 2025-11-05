@@ -13,7 +13,10 @@ from settings.storage import Storage
 
 
 def main() -> None:
-    Storage.password = SignIn().password
+    password = SignIn().password
+    if password is None:
+        return
+    Storage.password = password
 
     websocket = WebSocketClient()
     websocket.start()

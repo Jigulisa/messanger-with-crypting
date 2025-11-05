@@ -6,6 +6,7 @@ from dearpygui.dearpygui import (
     add_checkbox,
     add_color_picker,
     add_file_extension,
+    add_group,
     add_input_int,
     add_input_text,
     add_radio_button,
@@ -93,6 +94,21 @@ class Settings(View):
 
     def fill_in_form(self: Self) -> None:
         add_button(label="Fill in form", callback=self.on_form)
+        group_id = add_group(horizontal=True)
+        new_address = add_input_text(label="enter server adress", parent=group_id)
+        add_button(
+            label="ok",
+            parent=group_id,
+            callback=lambda _: self.on_changing_adress(get_value(new_address)),
+        )
+        add_button(
+            label="set default adress",
+            parent=group_id,
+            callback=lambda _: self.on_changing_adress("127.0.0.1"),
+        )
+
+    def on_changing_adress(self, addr) -> None:
+        pass  # TODO: change adress in settings
 
     def on_background(
         self: Self,

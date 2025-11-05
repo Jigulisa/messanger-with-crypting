@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from contextlib import suppress
 from queue import Empty, Queue
+from re import compile
 
 from dearpygui.dearpygui import (
     add_button,
@@ -11,7 +12,9 @@ from dearpygui.dearpygui import (
     bind_font,
     create_context,
     create_viewport,
+    delete_item,
     destroy_context,
+    does_item_exist,
     font,
     font_registry,
     get_value,
@@ -27,6 +30,7 @@ from dearpygui.dearpygui import (
     show_viewport,
     start_dearpygui,
     stop_dearpygui,
+    window,
 )
 
 from gui.menu import Menu
@@ -37,10 +41,13 @@ from settings.storage import Storage
 
 class SignIn:
     def __init__(self) -> None:
+        self.pattern = compile(
+            r"^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{8,}$",
+        )
         create_context()
 
         create_viewport(width=300, height=200)
-        self.password = ""
+        self.password = None
         self.main_window = add_window(
             label="Cryptogram",
             width=290,
@@ -70,9 +77,33 @@ class SignIn:
         start_dearpygui()
         destroy_context()
 
+    def make_notification(self, message: str) -> None:
+        if does_item_exist("Notification"):
+            delete_item("Notification")
+        with window(
+            tag="Notification",
+            width=300,
+            height=250,
+            no_resize=True,
+            pos=[0, 0],
+        ):
+            add_text(message, wrap=290)
+            add_button(
+                label="Ok",
+                callback=lambda: delete_item("Notification"),
+            )
+
     def on_password(self) -> None:
-        self.password: str = get_value(self.password_input)
-        stop_dearpygui()
+        password: str = get_value(self.password_input)
+        is_correct = bool(self.pattern.match(password))
+        if is_correct:
+            self.password = password
+            stop_dearpygui()
+        else:
+            self.make_notification(
+                "Oops, wrong password. It must contain at least"
+                "8 characters, 1 small letter, 1 big letter and a number",
+            )
 
 
 class Messenger:

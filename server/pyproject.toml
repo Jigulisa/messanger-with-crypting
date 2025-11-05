@@ -13,6 +13,7 @@ dependencies = [
     "litestar[pydantic,redis,sqlalchemy]",
     "uuid-utils",
     "uvicorn[standard]",
+    "asyncpg",
 ]
 
 [tool.uv.sources]

@@ -11,7 +11,7 @@ class Chat(base.UUIDv7AuditBase):
     description: Mapped[str | None]
 
     owner_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
-    owner: Mapped[User] = relationship()
+    owner: Mapped[User] = relationship(lazy="joined")
 
 
 class Message(base.UUIDv7AuditBase):
@@ -20,20 +20,20 @@ class Message(base.UUIDv7AuditBase):
     sent_time: Mapped[datetime]
 
     author_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
-    author: Mapped[User] = relationship()
+    author: Mapped[User] = relationship(lazy="joined")
 
     chat_id: Mapped[UUID] = mapped_column(ForeignKey("chat.id"))
-    chat: Mapped[Chat] = relationship()
+    chat: Mapped[Chat] = relationship(lazy="joined")
 
     signature: Mapped[str]
 
 
 class Access(base.UUIDv7AuditBase):
     user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
-    user: Mapped[User] = relationship()
+    user: Mapped[User] = relationship(lazy="joined")
 
     chat_id: Mapped[UUID] = mapped_column(ForeignKey("chat.id"))
-    chat: Mapped[Chat] = relationship()
+    chat: Mapped[Chat] = relationship(lazy="joined")
 
     chat_name: Mapped[str | None]
 

@@ -4,6 +4,14 @@ services:
       context: "./"
       dockerfile: "./Dockerfile"
     ports:
-      - "$PORT:$PORT"
+      - "$SERVER_PORT:$SERVER_PORT"
+    env_file:
+      - "./.env"
+
+  postgres:
+    hostname: "postgres"
+    image: "postgres:latest"
+    expose:
+      - "$POSTGRES_PORT"
     env_file:
       - "./.env"

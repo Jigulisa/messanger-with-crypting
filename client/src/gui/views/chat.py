@@ -25,13 +25,12 @@ from dearpygui.dearpygui import (
     set_item_width,
     set_value,
     set_y_scroll,
-    show_item,
     window,
 )
 from orjson import dumps
 
 from gui.views.core import View
-from net.chat import create_chat, grant_access, get_all_messages
+from net.chat import create_chat, get_all_messages, grant_access
 from net.dto import MessageDTO
 from secure.aead import decrypt, encrypt, generate_key
 from settings import Settings
@@ -118,7 +117,11 @@ class Chat(View):
         file_name = str(get_item_label(self.current_chat))
         add_text(parent=self.options_window, default_value=file_name)
 
-        add_button(parent=self.options_window, label="Add user", callback=self.on_adding_user)
+        add_button(
+            parent=self.options_window,
+            label="Add user",
+            callback=self.on_adding_user,
+        )
         add_button(parent=self.options_window, label="Report", callback=self.on_report)
         add_button(
             label="close",
@@ -139,7 +142,11 @@ class Chat(View):
             width=245,
             callback=self.on_new_desc,
         )
-        add_button(parent=self.options_window, label="export", callback=lambda: self.on_export_pressed())
+        add_button(
+            parent=self.options_window,
+            label="export",
+            callback=lambda: self.on_export_pressed(),
+        )
 
     def on_report(self) -> None:
         chat_name = self.current_chat
@@ -158,7 +165,6 @@ class Chat(View):
 
             comment = add_input_text()
             add_button(label="Ok", callback=lambda: delete_item("report_comment"))
-
 
     def on_new_chat_name(self) -> None:
         hide_item(self.options_window)  # pyright: ignore[reportArgumentType]
@@ -242,6 +248,8 @@ class Chat(View):
         delete_item("message_group", children_only=True)
         set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat
+        for message in get_all_messages(selected_chat) or []:
+            self.on_receiving(message)
 
     def on_sending(self: Self) -> None:
         text = get_value("input")

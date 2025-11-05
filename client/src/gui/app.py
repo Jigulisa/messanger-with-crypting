@@ -85,7 +85,7 @@ class SignIn:
             width=300,
             height=250,
             no_resize=True,
-            pos=[0,0],
+            pos=[0, 0],
         ):
             add_text(message, wrap=290)
             add_button(

@@ -24,6 +24,7 @@ liboqs-python = { git = "https://github.com/open-quantum-safe/liboqs-python.git"
 
 [dependency-groups]
 dev = [
+    "auto-py-to-exe",
     "ruff",
 ]
 

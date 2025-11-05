@@ -17,6 +17,7 @@ from dearpygui.dearpygui import (
     get_viewport_width,
     set_value,
     show_item,
+    show_style_editor,
     window,
 )
 
@@ -30,7 +31,8 @@ class Settings(View):
 
     def create(self: Self) -> None:
         add_text("Settings")
-        self.create_appearance_set()
+        add_button(label="show style editor", callback=lambda: show_style_editor())
+        # self.create_appearance_set()
         self.new_username_place()
         self.fill_in_form()
 

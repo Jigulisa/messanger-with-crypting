@@ -1,1 +1,1 @@
-ссылка на видео - https://disk.yandex.ru/i/t8npAssCw3eahw
+ссылка на видео - https://screenrec.com/share/fjLNc06kmP

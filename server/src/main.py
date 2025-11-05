@@ -17,6 +17,7 @@ from litestar.plugins.sqlalchemy import (
     SQLAlchemyInitPlugin,
     base,
 )
+from sqlalchemy.exc import OperationalError
 
 from ai.router import router as ai_router
 from files.router import router as files_router
@@ -33,9 +34,12 @@ class OnSturtup:
     )
 
     async def __call__(self: Self) -> None:
-        async with self.sqlalchemy_config.get_engine().begin() as connection:
-            await connection.run_sync(base.UUIDv7AuditBase.metadata.drop_all)
-            await connection.run_sync(base.UUIDv7AuditBase.metadata.create_all)
+        try:
+            async with self.sqlalchemy_config.get_engine().begin() as connection:
+                await connection.run_sync(base.UUIDv7AuditBase.metadata.drop_all)
+                await connection.run_sync(base.UUIDv7AuditBase.metadata.create_all)
+        except OperationalError as exception:
+            print(exception)
 
 
 app = Litestar(

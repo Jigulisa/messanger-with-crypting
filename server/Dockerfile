@@ -34,4 +34,4 @@ COPY ./src/ ./src/
 ENV PYTHONPATH=./src/
 COPY --from=oqs /oqs/install/ ./libs/oqs/
 
-CMD ["/bin/sh", "-c", "uv run --no-dev litestar --app src.main:app run -H 0.0.0.0 -p $PORT -W $(nproc)"]
+CMD ["/bin/sh", "-c", "uv run --no-dev litestar --app src.main:app run -d -H 0.0.0.0 -p $SERVER_PORT -W $(nproc)"]

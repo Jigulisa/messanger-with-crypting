@@ -5,6 +5,7 @@ environ["OQS_INSTALL_PATH"] = str(
     Path(__file__).resolve().parent.parent / "libs" / "oqs",
 )
 
+from os import environ
 from typing import Self
 
 from litestar import Litestar
@@ -29,7 +30,7 @@ from users.router import router as users_router
 
 class OnSturtup:
     sqlalchemy_config = SQLAlchemyAsyncConfig(
-        connection_string="sqlite+aiosqlite:///database.sqlite",
+        connection_string=environ.get("DB_CONNECTION_STR", "sqlite+aiosqlite:///database.sqlite"),
         session_config=AsyncSessionConfig(expire_on_commit=False),
     )
 

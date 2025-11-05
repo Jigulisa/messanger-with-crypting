@@ -242,6 +242,8 @@ class Chat(View):
         delete_item("message_group", children_only=True)
         set_value("chat_name", Settings.get_chat_name(selected_chat))
         self.current_chat = selected_chat
+        for message in get_all_messages(selected_chat) or []:
+            self.on_receiving(message)
 
     def on_sending(self: Self) -> None:
         text = get_value("input")

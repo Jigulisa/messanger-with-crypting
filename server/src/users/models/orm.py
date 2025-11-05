@@ -32,6 +32,6 @@ class User(base.UUIDv7AuditBase):
     other_hobby: Mapped[bool | None]
 
     __table_args__ = (
-        Index('idx_user_dsa_public_key_md5', func.md5(dsa_public_key), unique=True),
-        Index('idx_user_kem_public_key_md5', func.md5(kem_public_key), unique=True),
+        Index("idx_user_dsa_public_key_md5", func.md5(dsa_public_key), unique=True),
+        Index("idx_user_kem_public_key_md5", func.md5(kem_public_key), unique=True),
     )

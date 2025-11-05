@@ -30,7 +30,10 @@ from users.router import router as users_router
 
 class OnSturtup:
     sqlalchemy_config = SQLAlchemyAsyncConfig(
-        connection_string=environ.get("DB_CONNECTION_STR", "sqlite+aiosqlite:///database.sqlite"),
+        connection_string=environ.get(
+            "DB_CONNECTION_STR",
+            "sqlite+aiosqlite:///database.sqlite",
+        ),
         session_config=AsyncSessionConfig(expire_on_commit=False),
     )
 

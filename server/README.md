@@ -1,3 +1,2 @@
-# Messenger with encryption
-## for those who care about their privacy
-^ 3^
+## некраткий экскурс
+скачиваете все зависимости и в гит баше делаете `PYTHONPATH=./src/ uv run litestar --app src.main:app run`
